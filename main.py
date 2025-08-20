@@ -83,7 +83,25 @@ class PipewireGUI:
         """Configure ttk styles"""
         self.style = Style()
         self.style.configure("Custom.TFrame", background="black")
-        self.style.configure("Title.TLabel", background="black", foreground="white")
+        self.style.configure(
+            "Title.TLabel",
+            background="black",
+            foreground="white",
+            font=("Arial", 14, "bold"),
+        )
+        self.style.configure(
+            "Status.TLabel",
+            background="#202020",
+            foreground="white",
+            font=("Arial", 26, "bold"),
+        )
+        self.style.configure(
+            "Status.Unit.TLabel",
+            background="black",
+            foreground="white",
+            font=("Arial", 10, "bold"),
+        )
+
         self.style.configure(
             "Rate.TButton",
             width=5,
@@ -130,9 +148,6 @@ class PipewireGUI:
                 ("selected", "black"),
             ],
         )  # When selected
-        self.style.configure(
-            "Status.TLabel", background="black", foreground="lightgray"
-        )
 
     def create_widgets(self):
         """Create and layout the main widgets"""
@@ -158,16 +173,7 @@ class PipewireGUI:
 
     def create_ui_elements(self):
         """Create the UI elements for the application"""
-        # Title
-        # self.title_label = Label(
-        #     self.main_frame,
-        #     text="Pipewire Sample Rate Selector",
-        #     font=("Arial", 16, "bold"),
-        #     style="Title.TLabel",
-        # )
-        # self.title_label.pack(pady=20)
 
-        # Current status
         self.create_current_status_section()
 
         # Sample rate buttons
@@ -181,30 +187,61 @@ class PipewireGUI:
 
     def create_current_status_section(self):
         current_rate = self.controller.get_current_sample_rate()
+        current_buffer = self.controller.get_current_buffer_size()
         formatted_rate = (
             self.format_sample_rate(current_rate)
             if current_rate != "Not set"
             else current_rate
         )
 
+        formatted_buffer = (
+            current_buffer if current_buffer != "Not set" else current_buffer
+        )
+
         current_status_frame = Frame(self.main_frame, style="Custom.TFrame")
         current_status_frame.pack(pady=20)
 
+        current_status_frame.grid_columnconfigure(0, weight=1)  # Sample rate value
+        current_status_frame.grid_columnconfigure(1, weight=0)  # "kHz" unit
+        current_status_frame.grid_columnconfigure(2, weight=0)  # Buffer size value
+        current_status_frame.grid_columnconfigure(3, weight=1)  # "samples" unit
+
+        # Sample rate value label
         self.current_sample_rate_label = Label(
             current_status_frame,
-            text=f"Current: {formatted_rate}{'kHz' if current_rate != 'Not set' else ''}",
-            font=("Arial", 12),
+            text=f"{formatted_rate}{'' if current_rate != '-----' else ''}",
             style="Status.TLabel",
+            anchor="e",
+            width=5,
+            padding=(15, 5, 15, 5),
         )
-        self.current_sample_rate_label.pack(pady=10)
+        self.current_sample_rate_label.grid(row=0, column=0, padx=0, pady=0, sticky="e")
 
+        # "kHz" unit label
+        Label(
+            current_status_frame,
+            text="kHz",
+            style="Status.Unit.TLabel",
+            padding=(0, 0, 10, 0),
+        ).grid(row=0, column=1, padx=5, pady=0, sticky="sw")
+
+        # Buffer size value label
         self.current_buffer_size_label = Label(
             current_status_frame,
-            text=f"Buffer: {formatted_rate}{''if current_rate != 'Not set' else ''}",
-            font=("Arial", 12),
+            text=f"{formatted_buffer}{'' if current_buffer != '-----' else ''}",
             style="Status.TLabel",
+            width=4,
+            padding=(15, 5, 15, 5),
+            anchor="e",
         )
-        self.current_buffer_size_label.pack(pady=10)
+        self.current_buffer_size_label.grid(row=0, column=2, padx=0, pady=0, sticky="e")
+
+        # "samples" unit label
+        Label(
+            current_status_frame,
+            text="samples",
+            style="Status.Unit.TLabel",
+        ).grid(row=0, column=3, padx=5, pady=0, sticky="sw")
 
     def create_sample_rate_section(self):
         """Create the sample rate selection with buttons"""
@@ -218,36 +255,37 @@ class PipewireGUI:
             text="Sample Rate",
             font=("Arial", 12, "bold"),
             style="Title.TLabel",
-        ).pack(pady=(0, 10))
+        ).pack()
 
         # Button frame for sample rates
-        button_frame = Frame(rate_frame, style="Custom.TFrame")
-        button_frame.pack(fill="x", padx=20)
 
         # Store button information for selection tracking
         self.rate_buttons = {}
         self.selected_rate = None
 
         # Create buttons for each sample rate
-        self.create_sample_rate_buttons(button_frame)
+        self.create_sample_rate_buttons()
 
-    def create_sample_rate_buttons(self, parent_frame):
+    def create_sample_rate_buttons(self):
         """Create buttons for each sample rate"""
         rates = self.controller.get_available_sample_rates()
 
+        # Create a single frame for buttons
+        button_frame = Frame(self.main_frame, style="Custom.TFrame")
+        button_frame.pack(pady=20, anchor="center")
+
         # Create buttons in a horizontal layout
-        for i, rate in enumerate(rates):
+        for rate in rates:
             formatted_rate = self.format_sample_rate(rate)
 
             # Create button with formatted rate text
             button = Button(
-                parent_frame,
-                # text=f"{formatted_rate} kHz",
+                button_frame,
                 text=f"{formatted_rate}",
                 command=lambda r=rate: self.on_sample_rate_selected(r),
                 style="Rate.TButton",
             )
-            button.pack(side="left", padx=5, pady=10)
+            button.pack(side="left", padx=10, pady=10)
 
             # Store button reference for later styling updates
             self.rate_buttons[rate] = button
@@ -266,26 +304,26 @@ class PipewireGUI:
             style="Title.TLabel",
         ).pack(pady=(0, 10))
 
-        # Button frame for buffer sizes
-        button_frame = Frame(buffer_frame, style="Custom.TFrame")
-        button_frame.pack(fill="x", padx=20)
-
         # Store button information for selection tracking
         self.buffer_buttons = {}
         self.selected_buffer_size = None
 
         # Create buttons for each buffer size
-        self.create_buffer_size_buttons(button_frame)
+        self.create_buffer_size_buttons()
 
-    def create_buffer_size_buttons(self, parent_frame):
+    def create_buffer_size_buttons(self):
         """Create buttons for each buffer size"""
         buffer_sizes = self.controller.get_available_buffer_sizes()
 
+        # Create a single frame for buttons
+        button_frame = Frame(self.main_frame, style="Custom.TFrame")
+        button_frame.pack(pady=20, anchor="center")
+
         # Create buttons in a horizontal layout
-        for i, buffer_size in enumerate(buffer_sizes):
+        for buffer_size in buffer_sizes:
             # Create button with buffer size text
             button = Button(
-                parent_frame,
+                button_frame,
                 text=f"{buffer_size}",
                 command=lambda b=buffer_size: self.on_buffer_size_selected(b),
                 style="Buffer.TButton",
@@ -365,20 +403,14 @@ class PipewireGUI:
             if current_rate != "Not set"
             else current_rate
         )
-        rate_unit = "kHz" if current_rate != "Not set" else ""
+        rate_unit = "" if current_rate != "Not set" else ""
 
         # Update sample rate label
-        self.current_sample_rate_label.config(
-            text=f"Current: {formatted_rate}{rate_unit}"
-        )
+        self.current_sample_rate_label.config(text=f"{formatted_rate}{rate_unit}")
 
         # Update buffer size label
         self.current_buffer_size_label.config(
-            text=(
-                f"Buffer: {current_buffer} samples"
-                if current_buffer != "Not set"
-                else "Buffer: Not set"
-            )
+            text=(f"{current_buffer}" if current_buffer != " " else "Not set"),
         )
 
     def run(self):
