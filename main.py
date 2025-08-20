@@ -168,6 +168,18 @@ class PipewireGUI:
         # self.title_label.pack(pady=20)
 
         # Current status
+        self.create_current_status_section()
+
+        # Sample rate buttons
+        self.create_sample_rate_section()
+
+        # Buffer size buttons
+        self.create_buffer_size()
+
+        # Control buttons
+        self.create_control_buttons()
+
+    def create_current_status_section(self):
         current_rate = self.controller.get_current_sample_rate()
         formatted_rate = (
             self.format_sample_rate(current_rate)
@@ -185,6 +197,7 @@ class PipewireGUI:
             style="Status.TLabel",
         )
         self.current_sample_rate_label.pack(pady=10)
+
         self.current_buffer_size_label = Label(
             current_status_frame,
             text=f"Buffer: {formatted_rate}{''if current_rate != 'Not set' else ''}",
@@ -192,15 +205,6 @@ class PipewireGUI:
             style="Status.TLabel",
         )
         self.current_buffer_size_label.pack(pady=10)
-
-        # Sample rate buttons
-        self.create_sample_rate_section()
-
-        # Buffer size buttons
-        self.create_buffer_size()
-
-        # Control buttons
-        self.create_control_buttons()
 
     def create_sample_rate_section(self):
         """Create the sample rate selection with buttons"""
