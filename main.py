@@ -67,6 +67,13 @@ class PipewireGUI:
         self.root = root
         self.controller = controller
 
+        # Store button information for selection tracking
+        self.rate_buttons = {}
+        self.selected_rate = None
+        # Store button information for selection tracking
+        self.buffer_buttons = {}
+        self.selected_buffer_size = None
+
         self.setup_window()
         self.setup_ttk_style()
         self.setup_config()
@@ -169,21 +176,6 @@ class PipewireGUI:
 
         self.create_ui_elements()
 
-    def format_sample_rate(self, rate):
-        """Format sample rate for display (44100 -> 44.1, 192000 -> 192)"""
-        if isinstance(rate, str) and rate.isdigit():
-            rate_num = int(rate)
-            if rate_num >= 1000:
-                formatted = rate_num / 1000
-                # Remove unnecessary decimal places
-                if formatted.is_integer():
-                    return str(int(formatted))
-                else:
-                    return f"{formatted:.1f}"
-            else:
-                return rate
-        return rate
-
     def create_ui_elements(self):
         self.create_current_status_section()
         self.create_sample_rate_section()
@@ -256,14 +248,6 @@ class PipewireGUI:
             text=config["title"],
             style=config["style"],
         ).pack(fill="x", anchor="center")
-
-        # Store button information for selection tracking
-        self.rate_buttons = {}
-        self.selected_rate = None
-
-        # Store button information for selection tracking
-        self.buffer_buttons = {}
-        self.selected_buffer_size = None
 
         self.create_buttons(self.sample_rate_config, self.rate_buttons)
 
@@ -399,6 +383,21 @@ class PipewireGUI:
         self.current_buffer_size_label.config(
             text=(f"{current_buffer}" if current_buffer != " " else "Not set"),
         )
+
+    def format_sample_rate(self, rate):
+        """Format sample rate for display (44100 -> 44.1, 192000 -> 192)"""
+        if isinstance(rate, str) and rate.isdigit():
+            rate_num = int(rate)
+            if rate_num >= 1000:
+                formatted = rate_num / 1000
+                # Remove unnecessary decimal places
+                if formatted.is_integer():
+                    return str(int(formatted))
+                else:
+                    return f"{formatted:.1f}"
+            else:
+                return rate
+        return rate
 
     def run(self):
         """Start the application"""
