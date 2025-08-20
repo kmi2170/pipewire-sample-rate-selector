@@ -2,13 +2,10 @@ from tkinter import *
 from tkinter.ttk import *  # Override with ttk widgets
 
 
-class PipewireController:
-    """Application logic for Pipewire sample rate management"""
-
+class PipewireConfig:
     def __init__(self):
-        self.current_sample_rate = None
-        self.current_buffer_size = None
-        self.available_rates = [
+        # configures for Pipewire
+        self.available_sample_rates = [
             "44100",
             "48000",
             "88200",
@@ -18,14 +15,22 @@ class PipewireController:
             "384000",
         ]
         self.available_buffer_sizes = ["32", "64", "128", "256", "512", "1024", "2048"]
-        self.devices = []
+        self.default_sample_rate = None
+        self.default_buffer_size = None
+
+
+class PipewireController(PipewireConfig):
+    """Application logic for Pipewire sample rate management"""
+
+    def __init__(self):
+        super().__init__()
+        self.current_sample_rate = None
+        self.current_buffer_size = None
 
     def get_available_sample_rates(self):
-        """Get list of available sample rates"""
-        return self.available_rates
+        return self.available_sample_rates
 
     def get_available_buffer_sizes(self):
-        """Get list of available buffer sizes"""
         return self.available_buffer_sizes
 
     def get_current_sample_rate(self):
@@ -53,41 +58,32 @@ class PipewireController:
         return True  # Return success/failure status
 
     def refresh_status(self):
-        """Refresh the list of available audio devices"""
-        # TODO: Implement actual pipewire device discovery
         print("Refreshing Pipewire status...")
         pass
 
-    # def get_devices(self):
-    #     """Get the list of available audio devices"""
-    #     return self.devices
-
 
 class PipewireGUI:
-    """GUI for Pipewire sample rate selector"""
-
-    def __init__(self, controller):
+    def __init__(self, root, controller):
+        self.root = root
         self.controller = controller
-        self.root = Tk()
+
         self.setup_window()
-        self.setup_style()
+        self.setup_ttk_style()
+        self.setup_config()
         self.create_widgets()
 
     def setup_window(self):
-        """Configure the main window properties"""
-        # self.root.title("Pipewire Sample Rate Selector")
         self.root.geometry("800x600")
         self.root.resizable(False, False)
 
-    def setup_style(self):
-        """Configure ttk styles"""
+    def setup_ttk_style(self):
         self.style = Style()
         self.style.configure("Custom.TFrame", background="black")
         self.style.configure(
             "Title.TLabel",
             background="black",
             foreground="white",
-            font=("Arial", 14, "bold"),
+            font=("Arial", 12, "bold"),
         )
         self.style.configure(
             "Status.TLabel",
@@ -101,7 +97,6 @@ class PipewireGUI:
             foreground="white",
             font=("Arial", 10, "bold"),
         )
-
         self.style.configure(
             "Rate.TButton",
             width=5,
@@ -119,38 +114,56 @@ class PipewireGUI:
             padding=(5, 14),
         )
 
-        # Configure button states for Rate buttons
+        # Configure button states for Rate and Buffer buttons
+        # active: when hovered
+        # pressed: when clicked
+        # selected: when selected
         self.style.map(
             "Rate.TButton",
             background=[
-                ("active", "lightblue"),  # When hovered
-                ("pressed", "cyan"),  # When clicked/selected
+                ("active", "lightblue"),
+                ("pressed", "cyan"),
                 ("selected", "cyan"),
-            ],  # When selected
+            ],
             foreground=[
-                ("active", "black"),  # When hovered
-                ("pressed", "black"),  # When clicked/selected
+                ("active", "black"),
+                ("pressed", "black"),
                 ("selected", "black"),
             ],
-        )  # When selected
-
-        # Configure button states for Buffer buttons
+        )
         self.style.map(
             "Buffer.TButton",
             background=[
-                ("active", "pink"),  # When hovered
-                ("pressed", "magenta"),  # When clicked/selected
+                ("active", "pink"),
+                ("pressed", "magenta"),
                 ("selected", "magenta"),
-            ],  # When selected
+            ],
             foreground=[
-                ("active", "black"),  # When hovered
-                ("pressed", "black"),  # When clicked/selected
+                ("active", "black"),
+                ("pressed", "black"),
                 ("selected", "black"),
             ],
-        )  # When selected
+        )
+
+    def setup_config(self):
+        self.sample_rate_config = {
+            "title": "Sample Rate",
+            "style": "Rate.TButton",
+            "unit": "kHz",
+            "format_function": self.format_sample_rate,
+            "available_values": self.controller.get_available_sample_rates(),
+            "on_click_function": self.on_sample_rate_selected,
+        }
+        self.buffer_size_config = {
+            "title": "Buffer Size",
+            "style": "Buffer.TButton",
+            "unit": "samples",
+            "format_function": None,
+            "available_values": self.controller.get_available_buffer_sizes(),
+            "on_click_function": self.on_buffer_size_selected,
+        }
 
     def create_widgets(self):
-        """Create and layout the main widgets"""
         self.main_frame = Frame(self.root, padding=10, style="Custom.TFrame")
         self.main_frame.pack(fill="both", expand=True)
 
@@ -172,17 +185,9 @@ class PipewireGUI:
         return rate
 
     def create_ui_elements(self):
-        """Create the UI elements for the application"""
-
         self.create_current_status_section()
-
-        # Sample rate buttons
         self.create_sample_rate_section()
-
-        # Buffer size buttons
-        self.create_buffer_size()
-
-        # Control buttons
+        self.create_buffer_size_section()
         self.create_control_buttons()
 
     def create_current_status_section(self):
@@ -243,95 +248,77 @@ class PipewireGUI:
             style="Status.Unit.TLabel",
         ).grid(row=0, column=3, padx=5, pady=0, sticky="sw")
 
-    def create_sample_rate_section(self):
-        """Create the sample rate selection with buttons"""
-        # Section frame
-        rate_frame = Frame(self.main_frame, style="Custom.TFrame")
-        rate_frame.pack(pady=20, fill="x")
-
-        # Section label
+    def create_section(self, config):
+        section_frame = Frame(self.main_frame, style="Custom.TFrame")
+        section_frame.pack(pady=20, fill="x", anchor="center")
         Label(
-            rate_frame,
-            text="Sample Rate",
-            font=("Arial", 12, "bold"),
-            style="Title.TLabel",
-        ).pack()
-
-        # Button frame for sample rates
+            section_frame,
+            text=config["title"],
+            style=config["style"],
+        ).pack(fill="x", anchor="center")
 
         # Store button information for selection tracking
         self.rate_buttons = {}
         self.selected_rate = None
 
-        # Create buttons for each sample rate
-        self.create_sample_rate_buttons()
+        # Store button information for selection tracking
+        self.buffer_buttons = {}
+        self.selected_buffer_size = None
 
-    def create_sample_rate_buttons(self):
-        """Create buttons for each sample rate"""
-        rates = self.controller.get_available_sample_rates()
+        self.create_buttons(self.sample_rate_config, self.rate_buttons)
 
-        # Create a single frame for buttons
+    def create_buttons(self, config, buttons):
         button_frame = Frame(self.main_frame, style="Custom.TFrame")
-        button_frame.pack(pady=20, anchor="center")
+        button_frame.pack(pady=20)
 
         # Create buttons in a horizontal layout
-        for rate in rates:
-            formatted_rate = self.format_sample_rate(rate)
-
-            # Create button with formatted rate text
+        for value in config["available_values"]:
+            formatted_value = (
+                config["format_function"](value) if config["format_function"] else value
+            )
             button = Button(
                 button_frame,
-                text=f"{formatted_rate}",
-                command=lambda r=rate: self.on_sample_rate_selected(r),
-                style="Rate.TButton",
+                text=formatted_value,
+                command=lambda v=value: config["on_click_function"](v),
+                style=config["style"],
             )
-            button.pack(side="left", padx=10, pady=10)
+            button.pack(side="left", padx=5, pady=10)
 
             # Store button reference for later styling updates
-            self.rate_buttons[rate] = button
+            buttons[value] = button
 
-    def create_buffer_size(self):
-        """Create the buffer size selection with buttons"""
-        # Section frame
+    def create_sample_rate_section(self):
+        rate_frame = Frame(self.main_frame, style="Custom.TFrame")
+        rate_frame.pack(pady=20)
+        Label(
+            rate_frame,
+            text=self.sample_rate_config["title"],
+            style="Title.TLabel",
+            anchor="center",
+        ).pack()
+
+        # Store button information for selection tracking
+        self.rate_buttons = {}
+        self.selected_rate = None
+
+        self.create_buttons(self.sample_rate_config, self.rate_buttons)
+
+    def create_buffer_size_section(self):
         buffer_frame = Frame(self.main_frame, style="Custom.TFrame")
-        buffer_frame.pack(pady=20, fill="x")
+        buffer_frame.pack(pady=20)
 
-        # Section label
         Label(
             buffer_frame,
-            text="Buffer Size",
-            font=("Arial", 12, "bold"),
+            text=self.buffer_size_config["title"],
             style="Title.TLabel",
+            anchor="center",
         ).pack(pady=(0, 10))
 
         # Store button information for selection tracking
         self.buffer_buttons = {}
         self.selected_buffer_size = None
 
-        # Create buttons for each buffer size
-        self.create_buffer_size_buttons()
-
-    def create_buffer_size_buttons(self):
-        """Create buttons for each buffer size"""
-        buffer_sizes = self.controller.get_available_buffer_sizes()
-
-        # Create a single frame for buttons
-        button_frame = Frame(self.main_frame, style="Custom.TFrame")
-        button_frame.pack(pady=20, anchor="center")
-
-        # Create buttons in a horizontal layout
-        for buffer_size in buffer_sizes:
-            # Create button with buffer size text
-            button = Button(
-                button_frame,
-                text=f"{buffer_size}",
-                command=lambda b=buffer_size: self.on_buffer_size_selected(b),
-                style="Buffer.TButton",
-            )
-            button.pack(side="left", padx=5, pady=10)
-
-            # Store button reference for later styling updates
-            self.buffer_buttons[buffer_size] = button
+        self.create_buttons(self.buffer_size_config, self.buffer_buttons)
 
     def create_control_buttons(self):
         """Create control buttons (refresh, apply, etc.)"""
@@ -422,8 +409,9 @@ class PipewireSampleRateSelector:
     """Main application class that coordinates GUI and Controller"""
 
     def __init__(self):
-        self.controller = PipewireController()
-        self.gui = PipewireGUI(self.controller)
+        root = Tk()
+        controller = PipewireController()
+        self.gui = PipewireGUI(root, controller)
 
     def run(self):
         """Start the application"""
