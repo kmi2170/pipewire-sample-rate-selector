@@ -8,7 +8,15 @@ class PipewireController:
     def __init__(self):
         self.current_sample_rate = None
         self.current_buffer_size = None
-        self.available_rates = ["44100", "48000", "88200", "96000", "176400", "192000"]
+        self.available_rates = [
+            "44100",
+            "48000",
+            "88200",
+            "96000",
+            "176400",
+            "192000",
+            "384000",
+        ]
         self.available_buffer_sizes = ["32", "64", "128", "256", "512", "1024", "2048"]
         self.devices = []
 
@@ -82,7 +90,7 @@ class PipewireGUI:
             background="#202020",
             foreground="cyan",
             relief="flat",
-            padding=(6, 14),
+            padding=(5, 14),
         )
         self.style.configure(
             "Buffer.TButton",
@@ -90,7 +98,7 @@ class PipewireGUI:
             background="#202020",
             foreground="magenta",
             relief="flat",
-            padding=(6, 14),
+            padding=(5, 14),
         )
 
         # Configure button states for Rate buttons
@@ -203,7 +211,7 @@ class PipewireGUI:
         # Section label
         Label(
             rate_frame,
-            text="Sample Rate [kHz]",
+            text="Sample Rate",
             font=("Arial", 12, "bold"),
             style="Title.TLabel",
         ).pack(pady=(0, 10))
