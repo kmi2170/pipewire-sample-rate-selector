@@ -96,82 +96,50 @@ class PipewireGUI:
     def _setup_ttk_style(self) -> None:
         self.style = Style()
         self.style.configure("Main.TFrame", background="black")
-        self.style.configure(
-            "Title.TLabel",
-            background="black",
-            foreground="white",
-            font=("Arial", 12, "bold"),
-        )
-        self.style.configure(
-            "Status.Value.TLabel",
-            background="#202020",
-            foreground="white",
-            font=("Arial", 26, "bold"),
-        )
-        self.style.configure(
-            "Status.Unit.TLabel",
-            background="black",
-            foreground="white",
-            font=("Arial", 10, "bold"),
-        )
-        self.style.configure(
-            "Rate.TButton",
-            width=5,
-            background="#202020",
-            foreground="cyan",
-            relief="flat",
-            font=("Arial", 12, "bold"),
-            padding=(5, 14),
-        )
-        self.style.configure(
-            "Buffer.TButton",
-            width=5,
-            background="#202020",
-            foreground="magenta",
-            relief="flat",
-            font=("Arial", 12, "bold"),
-            padding=(5, 14),
-        )
-        self.style.configure(
-            "Control.TButton",
-            width=8,
-            background="#202020",
-            foreground="white",
-            font=("Arial", 10, "bold"),
-            relief="flat",
-            padding=(5, 10),
-        )
+        for style_name, bg, fg, font_size in [
+            ("Title.TLabel", "black", "white", 12),
+            ("Status.Value.TLabel", "#202020", "white", 26),
+            ("Status.Unit.TLabel", "black", "white", 10),
+        ]:
+            self.style.configure(
+                style_name,
+                background=bg,
+                foreground=fg,
+                font=("Arial", font_size, "bold"),
+            )
+        for style_name, width, fg, font_size, padding in [
+            ("Rate.TButton", 5, "cyan", 12, (5, 14)),
+            ("Buffer.TButton", 5, "magenta", 12, (5, 14)),
+            ("Control.TButton", 8, "white", 10, (5, 10)),
+        ]:
+            self.style.configure(
+                style_name,
+                width=width,
+                background="#202020",
+                foreground=fg,
+                relief="flat",
+                font=("Arial", font_size, "bold"),
+                padding=padding,
+            )
 
         # Configure button states for Rate and Buffer buttons
-        # active: when hovered
-        # pressed: when clicked
-        # selected: when selected
-        self.style.map(
-            "Rate.TButton",
-            background=[
-                ("active", "lightblue"),
-                ("pressed", "cyan"),
-                ("selected", "cyan"),
-            ],
-            foreground=[
-                ("active", "black"),
-                ("pressed", "black"),
-                ("selected", "black"),
-            ],
-        )
-        self.style.map(
-            "Buffer.TButton",
-            background=[
-                ("active", "pink"),
-                ("pressed", "magenta"),
-                ("selected", "magenta"),
-            ],
-            foreground=[
-                ("active", "black"),
-                ("pressed", "black"),
-                ("selected", "black"),
-            ],
-        )
+        for style_name, active_color, pressed_color in [
+            ("Rate.TButton", "lightblue", "cyan"),
+            ("Buffer.TButton", "pink", "magenta"),
+        ]:
+            self.style.map(
+                style_name,
+                background=[
+                    ("active", active_color),
+                    ("pressed", pressed_color),
+                    ("selected", pressed_color),
+                ],
+                foreground=[
+                    ("active", "black"),
+                    ("pressed", "black"),
+                    ("selected", "black"),
+                ],
+            )
 
     def _setup_config_for_ui(self) -> None:
         self._sample_rate_config = {
@@ -195,47 +163,45 @@ class PipewireGUI:
         self._create_control_buttons()
 
     def _create_current_status_section(self) -> None:
-        current_sample_rate = self.controller.get_current_value("rate")
-        current_buffer_size = self.controller.get_current_value("quantum")
+        frame = Frame(self.root, style="Main.TFrame")
+        frame.pack(pady=10)
 
-        current_status_frame = Frame(self.root, style="Main.TFrame")
-        current_status_frame.pack(pady=10)
+        # Configure grid columns
+        for i, weight in enumerate([1, 0, 0, 1]):
+            frame.grid_columnconfigure(i, weight=weight)
 
-        current_status_frame.grid_columnconfigure(0, weight=1)  # Sample rate value
-        current_status_frame.grid_columnconfigure(1, weight=0)  # "kHz" unit
-        current_status_frame.grid_columnconfigure(2, weight=0)  # Buffer size value
-        current_status_frame.grid_columnconfigure(3, weight=1)  # "samples" unit
+        current_rate = self.controller.get_current_value("rate")
+        current_buffer = self.controller.get_current_value("quantum")
 
-        self.current_sample_rate_label = Label(
-            current_status_frame,
-            text=self._format_sample_rate(current_sample_rate),
+        self.current_sample_rate_label = self._create_status_label(
+            frame, self._format_sample_rate(current_rate), 0, width=5
+        )
+        self._create_unit_label(frame, "kHz", 1)
+
+        self.current_buffer_size_label = self._create_status_label(
+            frame, self._format_buffer_size(current_buffer), 2, width=4
+        )
+        self._create_unit_label(frame, "samples", 3)
+
+    def _create_status_label(
+        self, parent: Frame, text: str, column: int, width: int
+    ) -> Label:
+        label = Label(
+            parent,
+            text=text,
             style="Status.Value.TLabel",
             anchor="e",
-            width=5,
+            width=width,
             padding=(15, 5, 15, 5),
         )
-        self.current_sample_rate_label.grid(row=0, column=0, padx=0, pady=0, sticky="e")
-        Label(
-            current_status_frame,
-            text="kHz",
-            style="Status.Unit.TLabel",
-            padding=(0, 0, 10, 0),
-        ).grid(row=0, column=1, padx=5, pady=0, sticky="sw")
+        label.grid(row=0, column=column, padx=0, pady=0, sticky="e")
+        return label
 
-        self.current_buffer_size_label = Label(
-            current_status_frame,
-            text=self._format_buffer_size(current_buffer_size),
-            style="Status.Value.TLabel",
-            width=4,
-            padding=(15, 5, 15, 5),
-            anchor="e",
+    def _create_unit_label(self, parent: Frame, text: str, column: int) -> None:
+        padding = (0, 0, 10, 0) if column == 1 else (0, 0, 0, 0)
+        Label(parent, text=text, style="Status.Unit.TLabel", padding=padding).grid(
+            row=0, column=column, padx=5, pady=0, sticky="sw"
         )
-        self.current_buffer_size_label.grid(row=0, column=2, padx=0, pady=0, sticky="e")
-        Label(
-            current_status_frame,
-            text="samples",
-            style="Status.Unit.TLabel",
-        ).grid(row=0, column=3, padx=5, pady=0, sticky="sw")
 
     def _set_initial_button_selection(self) -> None:
         current_sample_rate = self.controller.get_current_value("rate")
@@ -246,10 +212,7 @@ class PipewireGUI:
 
     def _create_buttons_section(self, config: ConfigDict, buttons: ButtonDict) -> None:
         Label(
-            self.root,
-            text=config["title"],
-            style="Title.TLabel",
-            anchor="center",
+            self.root, text=config["title"], style="Title.TLabel", anchor="center"
         ).pack(pady=(10, 0))
 
         self._create_buttons(config, buttons)
@@ -273,7 +236,6 @@ class PipewireGUI:
             )
             button.pack(side="left", padx=5, pady=10)
 
-            # Store button reference for later styling updates
             buttons[value] = button
 
     def _create_control_buttons(self) -> None:
@@ -304,30 +266,23 @@ class PipewireGUI:
     def update_status(self) -> None:
         current_rate = self.controller.get_current_value("rate")
         current_buffer = self.controller.get_current_value("quantum")
-        formatted_rate = self._format_sample_rate(current_rate)
-        formatted_buffer = self._format_buffer_size(current_buffer)
-
-        self.current_sample_rate_label.config(text=f"{formatted_rate}")
-        self.current_buffer_size_label.config(text=f"{formatted_buffer}")
+        self.current_sample_rate_label.config(
+            text=self._format_sample_rate(current_rate)
+        )
+        self.current_buffer_size_label.config(
+            text=self._format_buffer_size(current_buffer)
+        )
 
     def _format_sample_rate(self, rate: int | None) -> str:
-        # Format sample rate for display (44100 -> 44.1, 192000 -> 192)
-        if isinstance(rate, int):
-            if rate >= 1000:
-                formatted = rate / 1000
-                # Remove unnecessary decimal places
-                if formatted.is_integer():
-                    return str(int(formatted))
-                else:
-                    return f"{formatted:.1f}"
-            else:
-                return str(rate)
-        return "--------"
+        if not isinstance(rate, int):
+            return "--------"
+        if rate < 1000:
+            return str(rate)
+        formatted = rate / 1000
+        return str(int(formatted)) if formatted.is_integer() else f"{formatted:.1f}"
 
     def _format_buffer_size(self, buffer_size: int | None) -> str:
-        if isinstance(buffer_size, int):
-            return str(buffer_size)
-        return "------"
+        return str(buffer_size) if isinstance(buffer_size, int) else "------"
 
     def run(self):
         self.root.mainloop()
