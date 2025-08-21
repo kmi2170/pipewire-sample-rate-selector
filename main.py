@@ -110,6 +110,7 @@ class PipewireGUI:
             background="#202020",
             foreground="cyan",
             relief="flat",
+            font=("Arial", 12, "bold"),
             padding=(5, 14),
         )
         self.style.configure(
@@ -118,6 +119,7 @@ class PipewireGUI:
             background="#202020",
             foreground="magenta",
             relief="flat",
+            font=("Arial", 12, "bold"),
             padding=(5, 14),
         )
         self.style.configure(
