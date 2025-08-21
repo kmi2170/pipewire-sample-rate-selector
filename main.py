@@ -16,7 +16,7 @@ class PipewireConfig:
 
 class UIConfig:
     def __init__(self):
-        self.window_geometry = "600x400"
+        self.window_geometry = "600x350"
         self.window_title = "Pipewire Sample Rate Selector"
         self.sample_rate_config = {
             "type": "rate",
@@ -159,12 +159,13 @@ class PipewireGUI:
             self._sample_rate_config, self._sample_rate_buttons
         )
         self._create_buttons_section(self._buffer_size_config, self._buffer_buttons)
-        self._set_initial_button_selection()
         self._create_control_buttons()
+
+        self._set_initial_button_selection()
 
     def _create_current_status_section(self) -> None:
         frame = Frame(self.root, style="Main.TFrame")
-        frame.pack(pady=10)
+        frame.pack(pady=(10, 10))
 
         # Configure grid columns
         for i, weight in enumerate([1, 0, 0, 1]):
@@ -219,7 +220,7 @@ class PipewireGUI:
 
     def _create_buttons(self, config: ConfigDict, buttons: ButtonDict) -> None:
         button_frame = Frame(self.root, style="Main.TFrame")
-        button_frame.pack(pady=10)
+        button_frame.pack(pady=0)
 
         # Create buttons in a horizontal layout
         for value in config["available_values"]:
@@ -244,7 +245,7 @@ class PipewireGUI:
             text="Exit",
             command=self.root.quit,
             style="Control.TButton",
-        ).pack(side="right", padx=10, pady=10)
+        ).pack(side="right")
 
     def on_button_selected(
         self, value: int, buttons: ButtonDict, type: PipewireValueType
