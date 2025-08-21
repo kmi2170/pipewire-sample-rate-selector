@@ -310,7 +310,7 @@ class PipewireGUI:
         self.current_sample_rate_label.config(text=f"{formatted_rate}")
         self.current_buffer_size_label.config(text=f"{formatted_buffer}")
 
-    def _format_sample_rate(self, rate: int) -> str:
+    def _format_sample_rate(self, rate: int | None) -> str:
         # Format sample rate for display (44100 -> 44.1, 192000 -> 192)
         if isinstance(rate, int):
             if rate >= 1000:
@@ -324,7 +324,7 @@ class PipewireGUI:
                 return str(rate)
         return "--------"
 
-    def _format_buffer_size(self, buffer_size: int) -> str:
+    def _format_buffer_size(self, buffer_size: int | None) -> str:
         if isinstance(buffer_size, int):
             return str(buffer_size)
         return "------"
