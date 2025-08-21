@@ -14,15 +14,15 @@ class PipewireConfig:
         self.available_buffer_sizes = (32, 64, 128, 256, 512, 1024, 2048)
 
 
-class PipewireController(PipewireConfig):
-    def __init__(self):
-        super().__init__()
+class PipewireController:
+    def __init__(self, config: PipewireConfig):
+        self.config = config
 
     def get_available_sample_rates(self) -> Tuple[int, ...]:
-        return self.available_sample_rates
+        return self.config.available_sample_rates
 
     def get_available_buffer_sizes(self) -> Tuple[int, ...]:
-        return self.available_buffer_sizes
+        return self.config.available_buffer_sizes
 
     def get_current_value(self, type: PipewireValueType) -> Optional[int]:
         return self._get_force_value(type) or self._get_value(type)
@@ -323,7 +323,8 @@ class PipewireGUI:
 class PipewireSampleRateSelector:
     def __init__(self):
         root = Tk()
-        controller = PipewireController()
+        config = PipewireConfig()
+        controller = PipewireController(config)
         self.gui = PipewireGUI(root, controller)
 
     def run(self):
