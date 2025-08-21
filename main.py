@@ -48,10 +48,6 @@ class PipewireController(PipewireConfig):
         self.current_buffer_size = buffer_size
         return True  # Return success/failure status
 
-    def refresh_status(self):
-        print("Refreshing Pipewire status...")
-        pass
-
 
 class PipewireGUI:
     def __init__(self, root, controller):
@@ -70,6 +66,7 @@ class PipewireGUI:
     def setup_window(self):
         self.root.geometry("800x600")
         self.root.resizable(False, False)
+        self.root.configure(bg="black", padx=10, pady=10)
 
     def setup_ttk_style(self):
         self.style = Style()
@@ -170,9 +167,6 @@ class PipewireGUI:
         }
 
     def create_ui(self):
-        self.main_frame = Frame(self.root, padding=10, style="Main.TFrame")
-        self.main_frame.pack(fill="both", expand=True)
-
         self.create_current_status_section()
         self.create_buttons_section(self.sample_rate_config, self.rate_buttons)
         self.create_buttons_section(self.buffer_size_config, self.buffer_buttons)
@@ -184,7 +178,7 @@ class PipewireGUI:
         formatted_rate = self.format_sample_rate(current_rate)
         formatted_buffer = self.format_buffer_size(current_buffer)
 
-        current_status_frame = Frame(self.main_frame, style="Main.TFrame")
+        current_status_frame = Frame(self.root, style="Main.TFrame")
         current_status_frame.pack(pady=20)
 
         current_status_frame.grid_columnconfigure(0, weight=1)  # Sample rate value
@@ -195,7 +189,7 @@ class PipewireGUI:
         self.current_sample_rate_label = Label(
             current_status_frame,
             text=f"{formatted_rate}",
-            style="Status.TLabel",
+            style="Status.Value.TLabel",
             anchor="e",
             width=5,
             padding=(15, 5, 15, 5),
@@ -211,7 +205,7 @@ class PipewireGUI:
         self.current_buffer_size_label = Label(
             current_status_frame,
             text=f"{formatted_buffer}",
-            style="Status.TLabel",
+            style="Status.Value.TLabel",
             width=4,
             padding=(15, 5, 15, 5),
             anchor="e",
@@ -224,19 +218,17 @@ class PipewireGUI:
         ).grid(row=0, column=3, padx=5, pady=0, sticky="sw")
 
     def create_buttons_section(self, config, buttons):
-        section_frame = Frame(self.main_frame, style="Main.TFrame")
-        section_frame.pack(pady=20)
         Label(
-            section_frame,
+            self.root,
             text=config["title"],
             style="Title.TLabel",
             anchor="center",
-        ).pack()
+        ).pack(pady=(20, 0))
 
         self.create_buttons(config, buttons)
 
     def create_buttons(self, config, buttons):
-        button_frame = Frame(self.main_frame, style="Main.TFrame")
+        button_frame = Frame(self.root, style="Main.TFrame")
         button_frame.pack(pady=20)
 
         # Create buttons in a horizontal layout
@@ -256,7 +248,7 @@ class PipewireGUI:
             buttons[value] = button
 
     def create_control_buttons(self):
-        control_frame = Frame(self.main_frame, style="Main.TFrame")
+        control_frame = Frame(self.root, style="Main.TFrame")
         control_frame.pack(side="bottom", fill="x", padx=10, pady=20)
 
         Button(
