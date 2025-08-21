@@ -1,19 +1,17 @@
 from tkinter import *
 from tkinter.ttk import *  # Override with ttk widgets
-from typing import Literal, Optional, Tuple
+from typing import Literal, Optional, Tuple, Dict, Any
 import subprocess
 
 PipewireValueType = Literal["rate", "quantum"]
+ButtonDict = Dict[int, Button]
+ConfigDict = Dict[str, Any]
 
 
 class PipewireConfig:
     def __init__(self):
         self.available_sample_rates = (44100, 48000, 88200, 96000, 176400, 192000)
         self.available_buffer_sizes = (32, 64, 128, 256, 512, 1024, 2048)
-
-        # Overrides default values in pipewire config
-        self.default_sample_rate = None
-        self.default_buffer_size = None
 
 
 class PipewireController(PipewireConfig):
@@ -57,26 +55,26 @@ class PipewireController(PipewireConfig):
 
 
 class PipewireGUI:
-    def __init__(self, root, controller):
+    def __init__(self, root: Tk, controller: PipewireController):
         self.root = root
         self.controller = controller
 
         # Store button information for selection tracking
-        self._sample_rate_buttons = {}
-        self._buffer_buttons = {}
+        self._sample_rate_buttons: Dict[int, Button] = {}
+        self._buffer_buttons: Dict[int, Button] = {}
 
         self._setup_window()
         self._setup_ttk_style()
         self._setup_config_for_ui()
         self._create_ui()
 
-    def _setup_window(self):
+    def _setup_window(self) -> None:
         self.root.geometry("600x400")
         self.root.resizable(False, False)
         self.root.title("Pipewire Sample Rate Selector")
         self.root.configure(bg="black", padx=10, pady=10)
 
-    def _setup_ttk_style(self):
+    def _setup_ttk_style(self) -> None:
         self.style = Style()
         self.style.configure("Main.TFrame", background="black")
         self.style.configure(
@@ -156,7 +154,7 @@ class PipewireGUI:
             ],
         )
 
-    def _setup_config_for_ui(self):
+    def _setup_config_for_ui(self) -> None:
         self._sample_rate_config = {
             "type": "rate",
             "title": "Sample Rate",
@@ -174,7 +172,7 @@ class PipewireGUI:
             "available_values": self.controller.get_available_buffer_sizes(),
         }
 
-    def _create_ui(self):
+    def _create_ui(self) -> None:
         self._create_current_status_section()
         self._create_buttons_section(
             self._sample_rate_config, self._sample_rate_buttons
@@ -183,7 +181,7 @@ class PipewireGUI:
         self._set_initial_button_selection()
         self._create_control_buttons()
 
-    def _create_current_status_section(self):
+    def _create_current_status_section(self) -> None:
         current_sample_rate = self.controller.get_current_value("rate")
         current_buffer_size = self.controller.get_current_value("quantum")
 
@@ -226,14 +224,14 @@ class PipewireGUI:
             style="Status.Unit.TLabel",
         ).grid(row=0, column=3, padx=5, pady=0, sticky="sw")
 
-    def _set_initial_button_selection(self):
+    def _set_initial_button_selection(self) -> None:
         current_sample_rate = self.controller.get_current_value("rate")
         current_buffer_size = self.controller.get_current_value("quantum")
 
         self._update_button_selection(current_sample_rate, self._sample_rate_buttons)
         self._update_button_selection(current_buffer_size, self._buffer_buttons)
 
-    def _create_buttons_section(self, config, buttons):
+    def _create_buttons_section(self, config: ConfigDict, buttons: ButtonDict) -> None:
         Label(
             self.root,
             text=config["title"],
@@ -243,7 +241,7 @@ class PipewireGUI:
 
         self._create_buttons(config, buttons)
 
-    def _create_buttons(self, config, buttons):
+    def _create_buttons(self, config: ConfigDict, buttons: ButtonDict) -> None:
         button_frame = Frame(self.root, style="Main.TFrame")
         button_frame.pack(pady=10)
 
@@ -265,7 +263,7 @@ class PipewireGUI:
             # Store button reference for later styling updates
             buttons[value] = button
 
-    def _create_control_buttons(self):
+    def _create_control_buttons(self) -> None:
         Button(
             self.root,
             text="Exit",
@@ -273,12 +271,16 @@ class PipewireGUI:
             style="Control.TButton",
         ).pack(side="right", padx=10, pady=10)
 
-    def on_button_selected(self, value, buttons, type: PipewireValueType):
+    def on_button_selected(
+        self, value: int, buttons: ButtonDict, type: PipewireValueType
+    ) -> None:
         self.controller.set_value(value, type)
         self.update_status()
         self._update_button_selection(value, buttons)
 
-    def _update_button_selection(self, selected_value, buttons):
+    def _update_button_selection(
+        self, selected_value: int, buttons: ButtonDict
+    ) -> None:
         for value, button in buttons.items():
             if value == selected_value:
                 button.state(["pressed"])
@@ -286,7 +288,7 @@ class PipewireGUI:
                 if "pressed" in button.state():
                     button.state(["!pressed"])
 
-    def update_status(self):
+    def update_status(self) -> None:
         current_rate = self.controller.get_current_value("rate")
         current_buffer = self.controller.get_current_value("quantum")
         formatted_rate = self._format_sample_rate(current_rate)
@@ -295,7 +297,7 @@ class PipewireGUI:
         self.current_sample_rate_label.config(text=f"{formatted_rate}")
         self.current_buffer_size_label.config(text=f"{formatted_buffer}")
 
-    def _format_sample_rate(self, rate):
+    def _format_sample_rate(self, rate: int) -> str:
         # Format sample rate for display (44100 -> 44.1, 192000 -> 192)
         if isinstance(rate, int):
             if rate >= 1000:
@@ -309,7 +311,7 @@ class PipewireGUI:
                 return str(rate)
         return "--------"
 
-    def _format_buffer_size(self, buffer_size):
+    def _format_buffer_size(self, buffer_size: int) -> str:
         if isinstance(buffer_size, int):
             return str(buffer_size)
         return "------"
