@@ -26,14 +26,17 @@ class PipewireController(PipewireConfig):
     def get_available_buffer_sizes(self):
         return self.available_buffer_sizes
 
-    def get_force_value(self, type: PipewireValueType) -> int:
+    def get_current_value(self, type: PipewireValueType) -> int:
+        return self._get_force_value(type) or self._get_value(type)
+
+    def _get_force_value(self, type: PipewireValueType) -> int:
         setting = subprocess.check_output(
             f"pw-metadata -n settings 0 clock.force-{type}", shell=True
         )
         value = setting.decode("UTF-8").split("value:'")[1].split("' type:")[0]
         return int(value)
 
-    def get_value(self, type: PipewireValueType) -> int:
+    def _get_value(self, type: PipewireValueType) -> int:
         setting = subprocess.check_output(
             f"pw-metadata -n settings 0 clock.{type}", shell=True
         )
@@ -108,10 +111,10 @@ class PipewireGUI:
         )
         self.style.configure(
             "Control.TButton",
-            width=10,
+            width=8,
             background="#202020",
             foreground="white",
-            font=("Arial", 12, "bold"),
+            font=("Arial", 10, "bold"),
             relief="flat",
             padding=(5, 10),
         )
@@ -171,9 +174,13 @@ class PipewireGUI:
             self._sample_rate_config, self._sample_rate_buttons
         )
         self._create_buttons_section(self._buffer_size_config, self._buffer_buttons)
+        self._set_initial_button_selection()
         self._create_control_buttons()
 
     def _create_current_status_section(self):
+        current_sample_rate = self.controller.get_current_value("rate")
+        current_buffer_size = self.controller.get_current_value("quantum")
+
         current_status_frame = Frame(self.root, style="Main.TFrame")
         current_status_frame.pack(pady=10)
 
@@ -184,7 +191,7 @@ class PipewireGUI:
 
         self.current_sample_rate_label = Label(
             current_status_frame,
-            text=None,
+            text=self._format_sample_rate(current_sample_rate),
             style="Status.Value.TLabel",
             anchor="e",
             width=5,
@@ -200,7 +207,7 @@ class PipewireGUI:
 
         self.current_buffer_size_label = Label(
             current_status_frame,
-            text=None,
+            text=self._format_buffer_size(current_buffer_size),
             style="Status.Value.TLabel",
             width=4,
             padding=(15, 5, 15, 5),
@@ -213,7 +220,12 @@ class PipewireGUI:
             style="Status.Unit.TLabel",
         ).grid(row=0, column=3, padx=5, pady=0, sticky="sw")
 
-        self.update_status()
+    def _set_initial_button_selection(self):
+        current_sample_rate = self.controller.get_current_value("rate")
+        current_buffer_size = self.controller.get_current_value("quantum")
+
+        self._update_button_selection(current_sample_rate, self._sample_rate_buttons)
+        self._update_button_selection(current_buffer_size, self._buffer_buttons)
 
     def _create_buttons_section(self, config, buttons):
         Label(
@@ -250,12 +262,6 @@ class PipewireGUI:
     def _create_control_buttons(self):
         Button(
             self.root,
-            text="Update",
-            command=self.update_status,
-            style="Control.TButton",
-        ).pack(side="left", padx=10, pady=10)
-        Button(
-            self.root,
             text="Exit",
             command=self.root.quit,
             style="Control.TButton",
@@ -275,12 +281,8 @@ class PipewireGUI:
                     button.state(["!pressed"])
 
     def update_status(self):
-        current_rate = self.controller.get_force_value(
-            "rate"
-        ) or self.controller.get_value("rate")
-        current_buffer = self.controller.get_force_value(
-            "quantum"
-        ) or self.controller.get_value("quantum")
+        current_rate = self.controller.get_current_value("rate")
+        current_buffer = self.controller.get_current_value("quantum")
         formatted_rate = self._format_sample_rate(current_rate)
         formatted_buffer = self._format_buffer_size(current_buffer)
 
