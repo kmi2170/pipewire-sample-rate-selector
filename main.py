@@ -4,7 +4,6 @@ from tkinter.ttk import *  # Override with ttk widgets
 
 class PipewireConfig:
     def __init__(self):
-        # configures for Pipewire
         self.available_sample_rates = [
             44100,
             48000,
@@ -15,13 +14,13 @@ class PipewireConfig:
             384000,
         ]
         self.available_buffer_sizes = [32, 64, 128, 256, 512, 1024, 2048]
+
+        # Overrides default values in pipewire config if defined
         self.default_sample_rate = None
         self.default_buffer_size = None
 
 
 class PipewireController(PipewireConfig):
-    """Application logic for Pipewire sample rate management"""
-
     def __init__(self):
         super().__init__()
         self.current_sample_rate = None
@@ -69,7 +68,7 @@ class PipewireGUI:
 
         # Store button information for selection tracking
         self.rate_buttons = {}
-        self.selected_rate = None
+        self.selected_sample_rate = None
         # Store button information for selection tracking
         self.buffer_buttons = {}
         self.selected_buffer_size = None
@@ -334,7 +333,7 @@ class PipewireGUI:
             else:
                 button.state(["!pressed"])
 
-        self.selected_rate = selected_value
+        self.selected_sample_rate = selected_value
 
     def update_status(self):
         current_rate = self.controller.get_current_sample_rate()
