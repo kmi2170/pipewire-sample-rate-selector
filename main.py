@@ -18,8 +18,8 @@ class PipewireConfig:
 class PipewireController(PipewireConfig):
     def __init__(self):
         super().__init__()
-        self.current_sample_rate = None
-        self.current_buffer_size = None
+        self._current_sample_rate = None
+        self._current_buffer_size = None
 
     def get_available_sample_rates(self):
         return self.available_sample_rates
@@ -30,35 +30,21 @@ class PipewireController(PipewireConfig):
     def get_current_sample_rate(self):
         """Get the currently set sample rate"""
         # TODO: Implement actual pipewire query
-        return self.current_sample_rate or None
+        return self._current_sample_rate or None
 
     def get_current_buffer_size(self):
         """Get the currently set buffer size"""
         # TODO: Implement actual pipewire query
-        return self.current_buffer_size or None
+        return self._current_buffer_size or None
 
     def set_value(self, value: int, type: PipewireValueType) -> None:
         """Set the value for pipewire"""
         # TODO: Implement actual pipewire command
         print(f"Setting {type} to: {value}")
         if type == "rate":
-            self.current_sample_rate = value
+            self._current_sample_rate = value
         elif type == "quantum":
-            self.current_buffer_size = value
-
-    # def set_sample_rate(self, rate):
-    #     """Set the sample rate for pipewire"""
-    #     # TODO: Implement actual pipewire command
-    #     print(f"Setting sample rate to: {rate} Hz")
-    #     self.current_sample_rate = rate
-    #     return True  # Return success/failure status
-
-    # def set_buffer_size(self, buffer_size):
-    #     """Set the buffer size for pipewire"""
-    #     # TODO: Implement actual pipewire command
-    #     print(f"Setting buffer size to: {buffer_size} samples")
-    #     self.current_buffer_size = buffer_size
-    #     return True  # Return success/failure status
+            self._current_buffer_size = value
 
 
 class PipewireGUI:
@@ -76,7 +62,7 @@ class PipewireGUI:
         self._create_ui()
 
     def _setup_window(self):
-        self.root.geometry("800x600")
+        self.root.geometry("600x400")
         self.root.resizable(False, False)
         self.root.configure(bg="black", padx=10, pady=10)
 
@@ -186,7 +172,7 @@ class PipewireGUI:
 
     def _create_current_status_section(self):
         current_status_frame = Frame(self.root, style="Main.TFrame")
-        current_status_frame.pack(pady=20)
+        current_status_frame.pack(pady=10)
 
         current_status_frame.grid_columnconfigure(0, weight=1)  # Sample rate value
         current_status_frame.grid_columnconfigure(1, weight=0)  # "kHz" unit
@@ -232,13 +218,13 @@ class PipewireGUI:
             text=config["title"],
             style="Title.TLabel",
             anchor="center",
-        ).pack(pady=(20, 0))
+        ).pack(pady=(10, 0))
 
         self._create_buttons(config, buttons)
 
     def _create_buttons(self, config, buttons):
         button_frame = Frame(self.root, style="Main.TFrame")
-        button_frame.pack(pady=20)
+        button_frame.pack(pady=10)
 
         # Create buttons in a horizontal layout
         for value in config["available_values"]:
@@ -264,13 +250,13 @@ class PipewireGUI:
             text="Update",
             command=self.update_status,
             style="Control.TButton",
-        ).pack(side="left", padx=10, pady=20)
+        ).pack(side="left", padx=10, pady=10)
         Button(
             self.root,
             text="Exit",
             command=self.root.quit,
             style="Control.TButton",
-        ).pack(side="right", padx=10, pady=20)
+        ).pack(side="right", padx=10, pady=10)
 
     def on_button_selected(self, value, buttons, type: PipewireValueType):
         self.controller.set_value(value, type)
