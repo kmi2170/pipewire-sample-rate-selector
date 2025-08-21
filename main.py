@@ -16,7 +16,7 @@ class PipewireConfig:
 
 class UIConfig:
     def __init__(self):
-        self.window_geometry = "600x350"
+        self.window_geometry = "480x320"
         self.window_title = "Pipewire Sample Rate Selector"
         self.sample_rate_config = {
             "type": "rate",
@@ -85,7 +85,7 @@ class PipewireGUI:
         self._setup_window()
         self._setup_ttk_style()
         self._setup_config_for_ui()
-        self._create_ui()
+        self._create_ui_elements()
 
     def _setup_window(self) -> None:
         self.root.geometry(self.ui_config.window_geometry)
@@ -97,8 +97,8 @@ class PipewireGUI:
         self.style = Style()
         self.style.configure("Main.TFrame", background="black")
         for style_name, bg, fg, font_size in [
-            ("Title.TLabel", "black", "white", 12),
-            ("Status.Value.TLabel", "#202020", "white", 26),
+            ("Title.TLabel", "black", "white", 11),
+            ("Status.Value.TLabel", "#202020", "white", 22),
             ("Status.Unit.TLabel", "black", "white", 10),
         ]:
             self.style.configure(
@@ -108,9 +108,9 @@ class PipewireGUI:
                 font=("Arial", font_size, "bold"),
             )
         for style_name, width, fg, font_size, padding in [
-            ("Rate.TButton", 5, "cyan", 12, (5, 14)),
-            ("Buffer.TButton", 5, "magenta", 12, (5, 14)),
-            ("Control.TButton", 8, "white", 10, (5, 10)),
+            ("Rate.TButton", 5, "cyan", 12, (2, 12)),
+            ("Buffer.TButton", 5, "magenta", 12, (2, 12)),
+            ("Control.TButton", 8, "white", 10, (0, 5)),
         ]:
             self.style.configure(
                 style_name,
@@ -153,7 +153,7 @@ class PipewireGUI:
             "available_values": self.controller.get_available_buffer_sizes(),
         }
 
-    def _create_ui(self) -> None:
+    def _create_ui_elements(self) -> None:
         self._create_current_status_section()
         self._create_buttons_section(
             self._sample_rate_config, self._sample_rate_buttons
@@ -193,7 +193,7 @@ class PipewireGUI:
             style="Status.Value.TLabel",
             anchor="e",
             width=width,
-            padding=(15, 5, 15, 5),
+            padding=(10, 2, 10, 2),
         )
         label.grid(row=0, column=column, padx=0, pady=0, sticky="e")
         return label
