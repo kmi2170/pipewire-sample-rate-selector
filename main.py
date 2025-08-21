@@ -36,12 +36,12 @@ class PipewireController(PipewireConfig):
     def get_current_sample_rate(self):
         """Get the currently set sample rate"""
         # TODO: Implement actual pipewire query
-        return self.current_sample_rate or "Not set"
+        return self.current_sample_rate or None
 
     def get_current_buffer_size(self):
         """Get the currently set buffer size"""
         # TODO: Implement actual pipewire query
-        return self.current_buffer_size or "Not set"
+        return self.current_buffer_size or None
 
     def set_sample_rate(self, rate):
         """Set the sample rate for pipewire"""
@@ -196,15 +196,8 @@ class PipewireGUI:
     def create_current_status_section(self):
         current_rate = self.controller.get_current_sample_rate()
         current_buffer = self.controller.get_current_buffer_size()
-        formatted_rate = (
-            self.format_sample_rate(current_rate)
-            if current_rate != "Not set"
-            else current_rate
-        )
-
-        formatted_buffer = (
-            current_buffer if current_buffer != "Not set" else current_buffer
-        )
+        formatted_rate = self.format_sample_rate(current_rate)
+        formatted_buffer = self.format_buffer_size(current_buffer)
 
         current_status_frame = Frame(self.main_frame, style="Main.TFrame")
         current_status_frame.pack(pady=20)
@@ -214,18 +207,15 @@ class PipewireGUI:
         current_status_frame.grid_columnconfigure(2, weight=0)  # Buffer size value
         current_status_frame.grid_columnconfigure(3, weight=1)  # "samples" unit
 
-        # Sample rate value label
         self.current_sample_rate_label = Label(
             current_status_frame,
-            text=f"{formatted_rate}{'' if current_rate != '-----' else ''}",
+            text=f"{formatted_rate}",
             style="Status.TLabel",
             anchor="e",
             width=5,
             padding=(15, 5, 15, 5),
         )
         self.current_sample_rate_label.grid(row=0, column=0, padx=0, pady=0, sticky="e")
-
-        # "kHz" unit label
         Label(
             current_status_frame,
             text="kHz",
@@ -233,18 +223,15 @@ class PipewireGUI:
             padding=(0, 0, 10, 0),
         ).grid(row=0, column=1, padx=5, pady=0, sticky="sw")
 
-        # Buffer size value label
         self.current_buffer_size_label = Label(
             current_status_frame,
-            text=f"{formatted_buffer}{'' if current_buffer != '-----' else ''}",
+            text=f"{formatted_buffer}",
             style="Status.TLabel",
             width=4,
             padding=(15, 5, 15, 5),
             anchor="e",
         )
         self.current_buffer_size_label.grid(row=0, column=2, padx=0, pady=0, sticky="e")
-
-        # "samples" unit label
         Label(
             current_status_frame,
             text="samples",
@@ -350,23 +337,13 @@ class PipewireGUI:
         self.selected_rate = selected_value
 
     def update_status(self):
-        """Update the status labels with current sample rate and buffer size"""
         current_rate = self.controller.get_current_sample_rate()
         current_buffer = self.controller.get_current_buffer_size()
-        formatted_rate = (
-            self.format_sample_rate(current_rate)
-            if current_rate != "Not set"
-            else current_rate
-        )
-        rate_unit = "" if current_rate != "Not set" else ""
+        formatted_rate = self.format_sample_rate(current_rate)
+        formatted_buffer = self.format_buffer_size(current_buffer)
 
-        # Update sample rate label
-        self.current_sample_rate_label.config(text=f"{formatted_rate}{rate_unit}")
-
-        # Update buffer size label
-        self.current_buffer_size_label.config(
-            text=(f"{current_buffer}" if current_buffer != " " else "Not set"),
-        )
+        self.current_sample_rate_label.config(text=f"{formatted_rate}")
+        self.current_buffer_size_label.config(text=f"{formatted_buffer}")
 
     def format_sample_rate(self, rate):
         """Format sample rate for display (44100 -> 44.1, 192000 -> 192)"""
@@ -381,7 +358,12 @@ class PipewireGUI:
                     return f"{formatted:.1f}"
             else:
                 return rate
-        return rate
+        return "------"
+
+    def format_buffer_size(self, buffer_size):
+        if isinstance(buffer_size, str) and buffer_size.isdigit():
+            return buffer_size
+        return "------"
 
     def run(self):
         self.root.mainloop()
