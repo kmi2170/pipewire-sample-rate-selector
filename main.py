@@ -6,15 +6,15 @@ class PipewireConfig:
     def __init__(self):
         # configures for Pipewire
         self.available_sample_rates = [
-            "44100",
-            "48000",
-            "88200",
-            "96000",
-            "176400",
-            "192000",
-            "384000",
+            44100,
+            48000,
+            88200,
+            96000,
+            176400,
+            192000,
+            384000,
         ]
-        self.available_buffer_sizes = ["32", "64", "128", "256", "512", "1024", "2048"]
+        self.available_buffer_sizes = [32, 64, 128, 256, 512, 1024, 2048]
         self.default_sample_rate = None
         self.default_buffer_size = None
 
@@ -347,22 +347,21 @@ class PipewireGUI:
 
     def format_sample_rate(self, rate):
         """Format sample rate for display (44100 -> 44.1, 192000 -> 192)"""
-        if isinstance(rate, str) and rate.isdigit():
-            rate_num = int(rate)
-            if rate_num >= 1000:
-                formatted = rate_num / 1000
+        if isinstance(rate, int):
+            if rate >= 1000:
+                formatted = rate / 1000
                 # Remove unnecessary decimal places
                 if formatted.is_integer():
                     return str(int(formatted))
                 else:
                     return f"{formatted:.1f}"
             else:
-                return rate
+                return str(rate)
         return "------"
 
     def format_buffer_size(self, buffer_size):
-        if isinstance(buffer_size, str) and buffer_size.isdigit():
-            return buffer_size
+        if isinstance(buffer_size, int):
+            return str(buffer_size)
         return "------"
 
     def run(self):
