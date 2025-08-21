@@ -248,21 +248,18 @@ class PipewireGUI:
             buttons[value] = button
 
     def create_control_buttons(self):
-        control_frame = Frame(self.root, style="Main.TFrame")
-        control_frame.pack(side="bottom", fill="x", padx=10, pady=20)
-
         Button(
-            control_frame,
+            self.root,
             text="Update",
             command=self.update_status,
             style="Control.TButton",
-        ).pack(side="left")
+        ).pack(side="left", padx=10, pady=20)
         Button(
-            control_frame,
+            self.root,
             text="Exit",
             command=self.root.quit,
             style="Control.TButton",
-        ).pack(side="right")
+        ).pack(side="right", padx=10, pady=20)
 
     # def on_button_selected(self, value, buttons, config):
     #     success = self.controller.set_sample_rate(value)
