@@ -4,14 +4,7 @@ from tkinter.ttk import *  # Override with ttk widgets
 
 class PipewireConfig:
     def __init__(self):
-        self.available_sample_rates = (
-            44100,
-            48000,
-            88200,
-            96000,
-            176400,
-            192000,
-        )
+        self.available_sample_rates = (44100, 48000, 88200, 96000, 176400, 192000)
         self.available_buffer_sizes = (32, 64, 128, 256, 512, 1024, 2048)
 
         # Overrides default values in pipewire config if defined
@@ -88,7 +81,7 @@ class PipewireGUI:
             font=("Arial", 12, "bold"),
         )
         self.style.configure(
-            "Status.TLabel",
+            "Status.Value.TLabel",
             background="#202020",
             foreground="white",
             font=("Arial", 26, "bold"),
