@@ -14,6 +14,24 @@ class PipewireConfig:
         self.available_buffer_sizes = (32, 64, 128, 256, 512, 1024, 2048)
 
 
+class UIConfig:
+    def __init__(self):
+        self.window_geometry = "600x400"
+        self.window_title = "Pipewire Sample Rate Selector"
+        self.sample_rate_config = {
+            "type": "rate",
+            "title": "Sample Rate",
+            "style": "Rate.TButton",
+            "unit": "kHz",
+        }
+        self.buffer_size_config = {
+            "type": "quantum",
+            "title": "Buffer Size",
+            "style": "Buffer.TButton",
+            "unit": "samples",
+        }
+
+
 class PipewireController:
     def __init__(self, config: PipewireConfig):
         self.config = config
@@ -55,9 +73,10 @@ class PipewireController:
 
 
 class PipewireGUI:
-    def __init__(self, root: Tk, controller: PipewireController):
+    def __init__(self, root: Tk, controller: PipewireController, ui_config: UIConfig):
         self.root = root
         self.controller = controller
+        self.ui_config = ui_config
 
         # Store button information for selection tracking
         self._sample_rate_buttons: Dict[int, Button] = {}
@@ -69,9 +88,9 @@ class PipewireGUI:
         self._create_ui()
 
     def _setup_window(self) -> None:
-        self.root.geometry("600x400")
+        self.root.geometry(self.ui_config.window_geometry)
         self.root.resizable(False, False)
-        self.root.title("Pipewire Sample Rate Selector")
+        self.root.title(self.ui_config.window_title)
         self.root.configure(bg="black", padx=10, pady=10)
 
     def _setup_ttk_style(self) -> None:
@@ -156,18 +175,12 @@ class PipewireGUI:
 
     def _setup_config_for_ui(self) -> None:
         self._sample_rate_config = {
-            "type": "rate",
-            "title": "Sample Rate",
-            "style": "Rate.TButton",
-            "unit": "kHz",
+            **self.ui_config.sample_rate_config,
             "format_function": self._format_sample_rate,
             "available_values": self.controller.get_available_sample_rates(),
         }
         self._buffer_size_config = {
-            "type": "quantum",
-            "title": "Buffer Size",
-            "style": "Buffer.TButton",
-            "unit": "samples",
+            **self.ui_config.buffer_size_config,
             "format_function": None,
             "available_values": self.controller.get_available_buffer_sizes(),
         }
@@ -324,8 +337,10 @@ class PipewireSampleRateSelector:
     def __init__(self):
         root = Tk()
         config = PipewireConfig()
+        ui_config = UIConfig()
         controller = PipewireController(config)
-        self.gui = PipewireGUI(root, controller)
+
+        self.gui = PipewireGUI(root, controller, ui_config)
 
     def run(self):
         self.gui.run()
