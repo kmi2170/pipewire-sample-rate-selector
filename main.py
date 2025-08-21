@@ -85,7 +85,7 @@ class PipewireGUI:
 
     def setup_ttk_style(self):
         self.style = Style()
-        self.style.configure("Custom.TFrame", background="black")
+        self.style.configure("Main.TFrame", background="black")
         self.style.configure(
             "Title.TLabel",
             background="black",
@@ -119,6 +119,15 @@ class PipewireGUI:
             foreground="magenta",
             relief="flat",
             padding=(5, 14),
+        )
+        self.style.configure(
+            "Control.TButton",
+            width=10,
+            background="#202020",
+            foreground="white",
+            font=("Arial", 12, "bold"),
+            relief="flat",
+            padding=(5, 10),
         )
 
         # Configure button states for Rate and Buffer buttons
@@ -171,7 +180,7 @@ class PipewireGUI:
         }
 
     def create_widgets(self):
-        self.main_frame = Frame(self.root, padding=10, style="Custom.TFrame")
+        self.main_frame = Frame(self.root, padding=10, style="Main.TFrame")
         self.main_frame.pack(fill="both", expand=True)
 
         self.create_ui_elements()
@@ -195,7 +204,7 @@ class PipewireGUI:
             current_buffer if current_buffer != "Not set" else current_buffer
         )
 
-        current_status_frame = Frame(self.main_frame, style="Custom.TFrame")
+        current_status_frame = Frame(self.main_frame, style="Main.TFrame")
         current_status_frame.pack(pady=20)
 
         current_status_frame.grid_columnconfigure(0, weight=1)  # Sample rate value
@@ -241,7 +250,7 @@ class PipewireGUI:
         ).grid(row=0, column=3, padx=5, pady=0, sticky="sw")
 
     def create_section(self, config):
-        section_frame = Frame(self.main_frame, style="Custom.TFrame")
+        section_frame = Frame(self.main_frame, style="Main.TFrame")
         section_frame.pack(pady=20, fill="x", anchor="center")
         Label(
             section_frame,
@@ -252,7 +261,7 @@ class PipewireGUI:
         self.create_buttons(self.sample_rate_config, self.rate_buttons)
 
     def create_buttons(self, config, buttons):
-        button_frame = Frame(self.main_frame, style="Custom.TFrame")
+        button_frame = Frame(self.main_frame, style="Main.TFrame")
         button_frame.pack(pady=20)
 
         # Create buttons in a horizontal layout
@@ -272,7 +281,7 @@ class PipewireGUI:
             buttons[value] = button
 
     def create_sample_rate_section(self):
-        rate_frame = Frame(self.main_frame, style="Custom.TFrame")
+        rate_frame = Frame(self.main_frame, style="Main.TFrame")
         rate_frame.pack(pady=20)
         Label(
             rate_frame,
@@ -281,14 +290,10 @@ class PipewireGUI:
             anchor="center",
         ).pack()
 
-        # Store button information for selection tracking
-        self.rate_buttons = {}
-        self.selected_rate = None
-
         self.create_buttons(self.sample_rate_config, self.rate_buttons)
 
     def create_buffer_size_section(self):
-        buffer_frame = Frame(self.main_frame, style="Custom.TFrame")
+        buffer_frame = Frame(self.main_frame, style="Main.TFrame")
         buffer_frame.pack(pady=20)
 
         Label(
@@ -298,41 +303,38 @@ class PipewireGUI:
             anchor="center",
         ).pack(pady=(0, 10))
 
-        # Store button information for selection tracking
-        self.buffer_buttons = {}
-        self.selected_buffer_size = None
-
         self.create_buttons(self.buffer_size_config, self.buffer_buttons)
 
     def create_control_buttons(self):
-        """Create control buttons (refresh, apply, etc.)"""
-        control_frame = Frame(self.main_frame, style="Custom.TFrame")
-        control_frame.pack(side="bottom", fill="x", pady=20)
+        control_frame = Frame(self.main_frame, style="Main.TFrame")
+        control_frame.pack(side="bottom", fill="x", padx=10, pady=20)
 
-        # Refresh button
-        Button(control_frame, text="Refresh", command=self.on_refresh_clicked).pack(
-            side="left"
-        )
-
-        # Exit button
-        Button(control_frame, text="Exit", command=self.root.quit).pack(side="right")
+        Button(
+            control_frame,
+            text="Refresh",
+            command=self.on_refresh_clicked,
+            style="Control.TButton",
+        ).pack(side="left")
+        Button(
+            control_frame,
+            text="Exit",
+            command=self.root.quit,
+            style="Control.TButton",
+        ).pack(side="right")
 
     def on_sample_rate_selected(self, rate):
-        """Handle sample rate selection"""
         success = self.controller.set_sample_rate(rate)
         if success:
             self.update_status()
             self.update_button_selection(rate, self.rate_buttons)
 
     def on_buffer_size_selected(self, buffer_size):
-        """Handle buffer size selection"""
         success = self.controller.set_buffer_size(buffer_size)
         if success:
             self.update_status()
             self.update_button_selection(buffer_size, self.buffer_buttons)
 
     def on_refresh_clicked(self):
-        """Handle refresh button click"""
         self.controller.refresh_status()
         self.update_status()
 
