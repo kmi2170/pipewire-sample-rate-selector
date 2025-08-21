@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter.ttk import *  # Override with ttk widgets
-from typing import Literal
+from typing import Literal, Optional, Tuple
 import subprocess
 
 PipewireValueType = Literal["rate", "quantum"]
@@ -20,28 +20,34 @@ class PipewireController(PipewireConfig):
     def __init__(self):
         super().__init__()
 
-    def get_available_sample_rates(self):
+    def get_available_sample_rates(self) -> Tuple[int, ...]:
         return self.available_sample_rates
 
-    def get_available_buffer_sizes(self):
+    def get_available_buffer_sizes(self) -> Tuple[int, ...]:
         return self.available_buffer_sizes
 
-    def get_current_value(self, type: PipewireValueType) -> int:
+    def get_current_value(self, type: PipewireValueType) -> Optional[int]:
         return self._get_force_value(type) or self._get_value(type)
 
-    def _get_force_value(self, type: PipewireValueType) -> int:
-        setting = subprocess.check_output(
-            f"pw-metadata -n settings 0 clock.force-{type}", shell=True
-        )
-        value = setting.decode("UTF-8").split("value:'")[1].split("' type:")[0]
-        return int(value)
+    def _get_force_value(self, type: PipewireValueType) -> Optional[int]:
+        try:
+            setting = subprocess.check_output(
+                f"pw-metadata -n settings 0 clock.force-{type}", shell=True
+            )
+            value = setting.decode("UTF-8").split("value:'")[1].split("' type:")[0]
+            return int(value)
+        except (subprocess.CalledProcessError, IndexError, ValueError):
+            return None
 
-    def _get_value(self, type: PipewireValueType) -> int:
-        setting = subprocess.check_output(
-            f"pw-metadata -n settings 0 clock.{type}", shell=True
-        )
-        value = setting.decode("UTF-8").split("value:'")[1].split("' type:")[0]
-        return int(value)
+    def _get_value(self, type: PipewireValueType) -> Optional[int]:
+        try:
+            setting = subprocess.check_output(
+                f"pw-metadata -n settings 0 clock.{type}", shell=True
+            )
+            value = setting.decode("UTF-8").split("value:'")[1].split("' type:")[0]
+            return int(value)
+        except (subprocess.CalledProcessError, IndexError, ValueError):
+            return None
 
     def set_value(self, value: int, type: PipewireValueType) -> None:
         subprocess.run(
