@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter.ttk import *  # Override with ttk widgets
 from typing import Literal
+import subprocess
 
 PipewireValueType = Literal["rate", "quantum"]
 
@@ -10,7 +11,7 @@ class PipewireConfig:
         self.available_sample_rates = (44100, 48000, 88200, 96000, 176400, 192000)
         self.available_buffer_sizes = (32, 64, 128, 256, 512, 1024, 2048)
 
-        # Overrides default values in pipewire config if defined
+        # Overrides default values in pipewire config
         self.default_sample_rate = None
         self.default_buffer_size = None
 
@@ -18,8 +19,6 @@ class PipewireConfig:
 class PipewireController(PipewireConfig):
     def __init__(self):
         super().__init__()
-        self._current_sample_rate = None
-        self._current_buffer_size = None
 
     def get_available_sample_rates(self):
         return self.available_sample_rates
@@ -27,24 +26,25 @@ class PipewireController(PipewireConfig):
     def get_available_buffer_sizes(self):
         return self.available_buffer_sizes
 
-    def get_current_sample_rate(self):
-        """Get the currently set sample rate"""
-        # TODO: Implement actual pipewire query
-        return self._current_sample_rate or None
+    def get_force_value(self, type: PipewireValueType) -> int:
+        setting = subprocess.check_output(
+            f"pw-metadata -n settings 0 clock.force-{type}", shell=True
+        )
+        value = setting.decode("UTF-8").split("value:'")[1].split("' type:")[0]
+        return int(value)
 
-    def get_current_buffer_size(self):
-        """Get the currently set buffer size"""
-        # TODO: Implement actual pipewire query
-        return self._current_buffer_size or None
+    def get_value(self, type: PipewireValueType) -> int:
+        setting = subprocess.check_output(
+            f"pw-metadata -n settings 0 clock.{type}", shell=True
+        )
+        value = setting.decode("UTF-8").split("value:'")[1].split("' type:")[0]
+        return int(value)
 
     def set_value(self, value: int, type: PipewireValueType) -> None:
-        """Set the value for pipewire"""
-        # TODO: Implement actual pipewire command
+        subprocess.run(
+            f"pw-metadata -n settings 0 clock.force-{type} {value}", shell=True
+        )
         print(f"Setting {type} to: {value}")
-        if type == "rate":
-            self._current_sample_rate = value
-        elif type == "quantum":
-            self._current_buffer_size = value
 
 
 class PipewireGUI:
@@ -53,7 +53,7 @@ class PipewireGUI:
         self.controller = controller
 
         # Store button information for selection tracking
-        self._rate_buttons = {}
+        self._sample_rate_buttons = {}
         self._buffer_buttons = {}
 
         self._setup_window()
@@ -64,6 +64,7 @@ class PipewireGUI:
     def _setup_window(self):
         self.root.geometry("600x400")
         self.root.resizable(False, False)
+        self.root.title("Pipewire Sample Rate Selector")
         self.root.configure(bg="black", padx=10, pady=10)
 
     def _setup_ttk_style(self):
@@ -166,7 +167,9 @@ class PipewireGUI:
 
     def _create_ui(self):
         self._create_current_status_section()
-        self._create_buttons_section(self._sample_rate_config, self._rate_buttons)
+        self._create_buttons_section(
+            self._sample_rate_config, self._sample_rate_buttons
+        )
         self._create_buttons_section(self._buffer_size_config, self._buffer_buttons)
         self._create_control_buttons()
 
@@ -272,8 +275,12 @@ class PipewireGUI:
                     button.state(["!pressed"])
 
     def update_status(self):
-        current_rate = self.controller.get_current_sample_rate()
-        current_buffer = self.controller.get_current_buffer_size()
+        current_rate = self.controller.get_force_value(
+            "rate"
+        ) or self.controller.get_value("rate")
+        current_buffer = self.controller.get_force_value(
+            "quantum"
+        ) or self.controller.get_value("quantum")
         formatted_rate = self._format_sample_rate(current_rate)
         formatted_buffer = self._format_buffer_size(current_buffer)
 
@@ -292,7 +299,7 @@ class PipewireGUI:
                     return f"{formatted:.1f}"
             else:
                 return str(rate)
-        return "------"
+        return "--------"
 
     def _format_buffer_size(self, buffer_size):
         if isinstance(buffer_size, int):
