@@ -76,7 +76,7 @@ class PipewireGUI:
 
         self.setup_window()
         self.setup_ttk_style()
-        self.setup_config()
+        self.setup_config_for_ui()
         self.create_widgets()
 
     def setup_window(self):
@@ -152,7 +152,7 @@ class PipewireGUI:
             ],
         )
 
-    def setup_config(self):
+    def setup_config_for_ui(self):
         self.sample_rate_config = {
             "title": "Sample Rate",
             "style": "Rate.TButton",
@@ -322,48 +322,28 @@ class PipewireGUI:
         success = self.controller.set_sample_rate(rate)
         if success:
             self.update_status()
-            self.update_button_selection(rate)
+            self.update_button_selection(rate, self.rate_buttons)
 
     def on_buffer_size_selected(self, buffer_size):
         """Handle buffer size selection"""
         success = self.controller.set_buffer_size(buffer_size)
         if success:
             self.update_status()
-            self.update_buffer_button_selection(buffer_size)
+            self.update_button_selection(buffer_size, self.buffer_buttons)
 
     def on_refresh_clicked(self):
         """Handle refresh button click"""
         self.controller.refresh_status()
         self.update_status()
 
-    def update_button_selection(self, selected_rate):
-        """Update visual feedback for selected button"""
-        # Reset all buttons to default appearance and highlight selected one
-        for rate, button in self.rate_buttons.items():
-            if rate == selected_rate:
-                # Highlight selected button
+    def update_button_selection(self, selected_value, buttons):
+        for rate, button in buttons.items():
+            if rate == selected_value:
                 button.state(["pressed"])
             else:
-                # Reset unselected buttons
                 button.state(["!pressed"])
 
-        self.selected_rate = selected_rate
-
-    def update_buffer_button_selection(self, selected_buffer_size):
-        """Update visual feedback for selected buffer button"""
-        # Reset all buttons to default appearance and highlight selected one
-        for buffer_size, button in self.buffer_buttons.items():
-            print(
-                f"Buffer size: {buffer_size}, selected_buffer_size: {selected_buffer_size}"
-            )
-            if buffer_size == selected_buffer_size:
-                # Highlight selected button
-                button.state(["pressed"])
-            else:
-                # Reset unselected buttons
-                button.state(["!pressed"])
-
-        self.selected_buffer_size = selected_buffer_size
+        self.selected_rate = selected_value
 
     def update_status(self):
         """Update the status labels with current sample rate and buffer size"""
@@ -400,20 +380,16 @@ class PipewireGUI:
         return rate
 
     def run(self):
-        """Start the application"""
         self.root.mainloop()
 
 
 class PipewireSampleRateSelector:
-    """Main application class that coordinates GUI and Controller"""
-
     def __init__(self):
         root = Tk()
         controller = PipewireController()
         self.gui = PipewireGUI(root, controller)
 
     def run(self):
-        """Start the application"""
         self.gui.run()
 
 
