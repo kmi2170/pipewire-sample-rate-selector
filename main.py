@@ -5,6 +5,7 @@ import subprocess
 
 from colors import COLORS
 from styles import setup_ttk_styles
+from formatters import Formatters
 
 PipewireValueType = Literal["rate", "quantum"]
 ButtonDict = Dict[int, Button]
@@ -213,21 +214,6 @@ class PipewireGUI:
 
     def run(self):
         self.root.mainloop()
-
-
-class Formatters:
-    @staticmethod
-    def format_sample_rate(rate: int | None) -> str:
-        if not isinstance(rate, int):
-            return "--------"
-        if rate < 1000:
-            return str(rate)
-        formatted = rate / 1000
-        return str(int(formatted)) if formatted.is_integer() else f"{formatted:.1f}"
-
-    @staticmethod
-    def format_buffer_size(buffer_size: int | None) -> str:
-        return str(buffer_size) if isinstance(buffer_size, int) else "------"
 
 
 class PipewireSampleRateSelector:
