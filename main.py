@@ -75,7 +75,7 @@ class PipewireGUI:
         self._setup_config_for_ui()
         self._create_ui_elements()
         self._create_control_buttons()
-        self._update_status_and_button_selection()
+        self._sync_status_and_button_selection()
 
     def _setup_window(self) -> None:
         self.root.geometry(WINDOW_GEOMETRY)
@@ -177,7 +177,7 @@ class PipewireGUI:
             button_frame,
             text="Sync",
             style="Control.TButton",
-            command=self._update_status_and_button_selection,
+            command=self._sync_status_and_button_selection,
         ).pack(side="left", pady=(10, 0))
         Button(
             button_frame,
@@ -186,7 +186,7 @@ class PipewireGUI:
             command=self.root.quit,
         ).pack(side="right", pady=(10, 0))
 
-    def _update_status_and_button_selection(self) -> None:
+    def _sync_status_and_button_selection(self) -> None:
         current_sample_rate = self.controller.get_current_value("rate")
         current_buffer_size = self.controller.get_current_value("quantum")
         self._update_status("rate", current_sample_rate)
