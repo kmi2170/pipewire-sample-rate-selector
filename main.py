@@ -18,7 +18,7 @@ AVAILABLE_BUFFER_SIZES = (32, 64, 128, 256, 512, 1024, 2048)
 
 
 # UI configuration constants
-WINDOW_GEOMETRY = "480x330"
+WINDOW_GEOMETRY = "480x320"
 WINDOW_TITLE = "Pipewire Sample Rate Selector"
 SAMPLE_RATE_CONFIG = {
     "type": "rate",
@@ -119,12 +119,6 @@ class PipewireGUI:
         for i, weight in enumerate([1, 0, 0, 1]):
             frame.grid_columnconfigure(i, weight=weight)
 
-        # current_sample_rate_text = Formatters.format_sample_rate(
-        #     self.controller.get_current_value("rate")
-        # )
-        # current_buffer_size_text = Formatters.format_buffer_size(
-        #     self.controller.get_current_value("quantum")
-        # )
         self.current_sample_rate_label = self._create_status_label(
             frame, Formatters.format_sample_rate(None), 0, width=5
         )
