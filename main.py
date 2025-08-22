@@ -16,7 +16,7 @@ class PipewireConfig:
 
 class UIConfig:
     def __init__(self):
-        self.window_geometry = "480x320"
+        self.window_geometry = "480x280"
         self.window_title = "Pipewire Sample Rate Selector"
         self.sample_rate_config = {
             "type": "rate",
@@ -159,7 +159,6 @@ class PipewireGUI:
             self._sample_rate_config, self._sample_rate_buttons
         )
         self._create_buttons_section(self._buffer_size_config, self._buffer_buttons)
-        self._create_control_buttons()
 
         self._set_initial_button_selection()
 
@@ -220,7 +219,7 @@ class PipewireGUI:
 
     def _create_buttons(self, config: ConfigDict, buttons: ButtonDict) -> None:
         button_frame = Frame(self.root, style="Main.TFrame")
-        button_frame.pack(pady=0)
+        button_frame.pack()
 
         # Create buttons in a horizontal layout
         for value in config["available_values"]:
@@ -239,19 +238,14 @@ class PipewireGUI:
 
             buttons[value] = button
 
-    def _create_control_buttons(self) -> None:
-        Button(
-            self.root,
-            text="Exit",
-            command=self.root.quit,
-            style="Control.TButton",
-        ).pack(side="right")
-
     def on_button_selected(
-        self, value: int, buttons: ButtonDict, type: PipewireValueType
+        self,
+        value: int,
+        buttons: ButtonDict,
+        type: PipewireValueType,
     ) -> None:
         self.controller.set_value(value, type)
-        self.update_status()
+        self.update_status(type)
         self._update_button_selection(value, buttons)
 
     def _update_button_selection(
@@ -264,15 +258,16 @@ class PipewireGUI:
                 if "pressed" in button.state():
                     button.state(["!pressed"])
 
-    def update_status(self) -> None:
-        current_rate = self.controller.get_current_value("rate")
-        current_buffer = self.controller.get_current_value("quantum")
-        self.current_sample_rate_label.config(
-            text=self._format_sample_rate(current_rate)
-        )
-        self.current_buffer_size_label.config(
-            text=self._format_buffer_size(current_buffer)
-        )
+    def update_status(self, type: PipewireValueType) -> None:
+        current_value = self.controller.get_current_value(type)
+        if type == "rate":
+            self.current_sample_rate_label.config(
+                text=self._format_sample_rate(current_value)
+            )
+        elif type == "quantum":
+            self.current_buffer_size_label.config(
+                text=self._format_buffer_size(current_value)
+            )
 
     def _format_sample_rate(self, rate: int | None) -> str:
         if not isinstance(rate, int):
