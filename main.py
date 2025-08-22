@@ -46,17 +46,15 @@ class PipewireController:
         return self._get_force_value(type) or self._get_value(type)
 
     def _get_force_value(self, type: PipewireValueType) -> Optional[int]:
-        try:
-            cmd = f"pw-metadata -n settings 0 clock.force-{type}"
-            output = subprocess.check_output(cmd, shell=True)
-            value = output.decode("UTF-8").split("value:'")[1].split("' type:")[0]
-            return int(value)
-        except (subprocess.CalledProcessError, IndexError, ValueError):
-            return None
+        cmd = f"pw-metadata -n settings 0 clock.force-{type}"
+        return self._get_value_from_metadata(cmd)
 
     def _get_value(self, type: PipewireValueType) -> Optional[int]:
+        cmd = f"pw-metadata -n settings 0 clock.{type}"
+        return self._get_value_from_metadata(cmd)
+
+    def _get_value_from_metadata(self, cmd: str) -> Optional[int]:
         try:
-            cmd = f"pw-metadata -n settings 0 clock.{type}"
             output = subprocess.check_output(cmd, shell=True)
             value = output.decode("UTF-8").split("value:'")[1].split("' type:")[0]
             return int(value)
@@ -65,8 +63,11 @@ class PipewireController:
 
     def set_value(self, value: int, type: PipewireValueType) -> None:
         cmd = f"pw-metadata -n settings 0 clock.force-{type} {value}"
-        subprocess.run(cmd, shell=True)
-        print(f"Setting {type} to: {value}")
+        try:
+            subprocess.run(cmd, shell=True)
+            print(f"Setting {type} to: {value}")
+        except subprocess.CalledProcessError:
+            print(f"Failed to set {type} to: {value}")
 
 
 class PipewireGUI:
