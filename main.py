@@ -8,40 +8,58 @@ ButtonDict = Dict[int, Button]
 ConfigDict = Dict[str, Any]
 
 
-class PipewireConfig:
-    def __init__(self):
-        self.available_sample_rates = (44100, 48000, 88200, 96000, 176400, 192000)
-        self.available_buffer_sizes = (32, 64, 128, 256, 512, 1024, 2048)
+# Pipewire configuration constants
+AVAILABLE_SAMPLE_RATES = (44100, 48000, 88200, 96000, 176400, 192000)
+AVAILABLE_BUFFER_SIZES = (32, 64, 128, 256, 512, 1024, 2048)
 
 
-class UIConfig:
-    def __init__(self):
-        self.window_geometry = "480x280"
-        self.window_title = "Pipewire Sample Rate Selector"
-        self.sample_rate_config = {
-            "type": "rate",
-            "title": "Sample Rate",
-            "style": "Rate.TButton",
-            "unit": "kHz",
-        }
-        self.buffer_size_config = {
-            "type": "quantum",
-            "title": "Buffer Size",
-            "style": "Buffer.TButton",
-            "unit": "samples",
-        }
+# UI configuration constants
+WINDOW_GEOMETRY = "480x280"
+WINDOW_TITLE = "Pipewire Sample Rate Selector"
+SAMPLE_RATE_CONFIG = {
+    "type": "rate",
+    "title": "Sample Rate",
+    "unit": "kHz",
+}
+BUFFER_SIZE_CONFIG = {
+    "type": "quantum",
+    "title": "Buffer Size",
+    "unit": "samples",
+}
+
+# Application color constants
+APP_COLORS = {
+    "bg_primary": "black",
+    "bg_secondary": "#202020",
+    "font_primary": "white",
+    "rate_font": {
+        "unselected": "cyan",
+        "active": "black",
+        "pressed": "black",
+        "selected": "black",
+    },
+    "buffer_font": {
+        "unselected": "magenta",
+        "active": "black",
+        "pressed": "black",
+        "selected": "black",
+    },
+    "rate_button": {
+        "unselected": "#202020",
+        "active": "lightblue",
+        "pressed": "cyan",
+        "selected": "cyan",
+    },
+    "buffer_button": {
+        "unselected": "#202020",
+        "active": "pink",
+        "pressed": "magenta",
+        "selected": "magenta",
+    },
+}
 
 
 class PipewireController:
-    def __init__(self, config: PipewireConfig):
-        self.config = config
-
-    def get_available_sample_rates(self) -> Tuple[int, ...]:
-        return self.config.available_sample_rates
-
-    def get_available_buffer_sizes(self) -> Tuple[int, ...]:
-        return self.config.available_buffer_sizes
-
     def get_current_value(self, type: PipewireValueType) -> Optional[int]:
         return self._get_force_value(type) or self._get_value(type)
 
@@ -71,10 +89,9 @@ class PipewireController:
 
 
 class PipewireGUI:
-    def __init__(self, root: Tk, controller: PipewireController, ui_config: UIConfig):
+    def __init__(self, root: Tk, controller: PipewireController):
         self.root = root
         self.controller = controller
-        self.ui_config = ui_config
 
         # Store button information for selection tracking
         self._sample_rate_buttons: Dict[int, Button] = {}
@@ -86,18 +103,33 @@ class PipewireGUI:
         self._create_ui_elements()
 
     def _setup_window(self) -> None:
-        self.root.geometry(self.ui_config.window_geometry)
+        self.root.geometry(WINDOW_GEOMETRY)
         self.root.resizable(False, False)
-        self.root.title(self.ui_config.window_title)
+        self.root.title(WINDOW_TITLE)
         self.root.configure(bg="black", padx=10, pady=10)
 
     def _setup_ttk_style(self) -> None:
         self.style = Style()
-        self.style.configure("Main.TFrame", background="black")
+        self.style.configure("Main.TFrame", background=APP_COLORS["bg_primary"])
         for style_name, bg, fg, font_size in [
-            ("Title.TLabel", "black", "white", 11),
-            ("Status.Value.TLabel", "#202020", "white", 22),
-            ("Status.Unit.TLabel", "black", "white", 10),
+            (
+                "Title.TLabel",
+                APP_COLORS["bg_primary"],
+                APP_COLORS["font_primary"],
+                11,
+            ),
+            (
+                "Status.Value.TLabel",
+                APP_COLORS["bg_secondary"],
+                APP_COLORS["font_primary"],
+                22,
+            ),
+            (
+                "Status.Unit.TLabel",
+                APP_COLORS["bg_primary"],
+                APP_COLORS["font_primary"],
+                10,
+            ),
         ]:
             self.style.configure(
                 style_name,
@@ -106,14 +138,25 @@ class PipewireGUI:
                 font=("Arial", font_size, "bold"),
             )
         for style_name, width, fg, font_size, padding in [
-            ("Rate.TButton", 5, "cyan", 12, (2, 12)),
-            ("Buffer.TButton", 5, "magenta", 12, (2, 12)),
-            ("Control.TButton", 8, "white", 10, (0, 5)),
+            (
+                "Rate.TButton",
+                5,
+                APP_COLORS["rate_font"]["unselected"],
+                12,
+                (2, 12),
+            ),
+            (
+                "Buffer.TButton",
+                5,
+                APP_COLORS["buffer_font"]["unselected"],
+                12,
+                (2, 12),
+            ),
         ]:
             self.style.configure(
                 style_name,
                 width=width,
-                background="#202020",
+                background=APP_COLORS["bg_secondary"],
                 foreground=fg,
                 relief="flat",
                 font=("Arial", font_size, "bold"),
@@ -121,34 +164,60 @@ class PipewireGUI:
             )
 
         # Configure button states for Rate and Buffer buttons
-        for style_name, active_color, pressed_color in [
-            ("Rate.TButton", "lightblue", "cyan"),
-            ("Buffer.TButton", "pink", "magenta"),
+        for (
+            style_name,
+            active_color,
+            pressed_color,
+            selected_color,
+            font_active_color,
+            font_pressed_color,
+            font_selected_color,
+        ) in [
+            (
+                "Rate.TButton",
+                APP_COLORS["rate_button"]["active"],
+                APP_COLORS["rate_button"]["pressed"],
+                APP_COLORS["rate_button"]["selected"],
+                APP_COLORS["rate_font"]["active"],
+                APP_COLORS["rate_font"]["pressed"],
+                APP_COLORS["rate_font"]["selected"],
+            ),
+            (
+                "Buffer.TButton",
+                APP_COLORS["buffer_button"]["active"],
+                APP_COLORS["buffer_button"]["pressed"],
+                APP_COLORS["buffer_button"]["selected"],
+                APP_COLORS["buffer_font"]["active"],
+                APP_COLORS["buffer_font"]["pressed"],
+                APP_COLORS["buffer_font"]["selected"],
+            ),
         ]:
             self.style.map(
                 style_name,
                 background=[
                     ("active", active_color),
                     ("pressed", pressed_color),
-                    ("selected", pressed_color),
+                    ("selected", selected_color),
                 ],
                 foreground=[
-                    ("active", "black"),
-                    ("pressed", "black"),
-                    ("selected", "black"),
+                    ("active", font_active_color),
+                    ("pressed", font_pressed_color),
+                    ("selected", font_selected_color),
                 ],
             )
 
     def _setup_config_for_ui(self) -> None:
         self._sample_rate_config = {
-            **self.ui_config.sample_rate_config,
+            **SAMPLE_RATE_CONFIG,
+            "style": "Rate.TButton",
             "format_function": Formatters.format_sample_rate,
-            "available_values": self.controller.get_available_sample_rates(),
+            "available_values": AVAILABLE_SAMPLE_RATES,
         }
         self._buffer_size_config = {
-            **self.ui_config.buffer_size_config,
+            **BUFFER_SIZE_CONFIG,
+            "style": "Buffer.TButton",
             "format_function": Formatters.format_buffer_size,
-            "available_values": self.controller.get_available_buffer_sizes(),
+            "available_values": AVAILABLE_BUFFER_SIZES,
         }
 
     def _create_ui_elements(self) -> None:
@@ -176,11 +245,11 @@ class PipewireGUI:
         self.current_sample_rate_label = self._create_status_label(
             frame, current_rate_text, 0, width=5
         )
-        self._create_unit_label(frame, self.ui_config.sample_rate_config["unit"], 1)
+        self._create_unit_label(frame, SAMPLE_RATE_CONFIG["unit"], 1)
         self.current_buffer_size_label = self._create_status_label(
             frame, current_buffer_text, 2, width=4
         )
-        self._create_unit_label(frame, self.ui_config.buffer_size_config["unit"], 3)
+        self._create_unit_label(frame, BUFFER_SIZE_CONFIG["unit"], 3)
 
     def _create_status_label(
         self, parent: Frame, text: str, column: int, width: int
@@ -286,11 +355,9 @@ class Formatters:
 class PipewireSampleRateSelector:
     def __init__(self):
         root = Tk()
-        config = PipewireConfig()
-        ui_config = UIConfig()
-        controller = PipewireController(config)
+        controller = PipewireController()
 
-        self.gui = PipewireGUI(root, controller, ui_config)
+        self.gui = PipewireGUI(root, controller)
 
     def run(self):
         self.gui.run()
