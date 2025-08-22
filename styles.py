@@ -10,24 +10,9 @@ def setup_ttk_styles(style: Style) -> None:
 
     # Configure label styles
     for style_name, bg, fg, font_size in [
-        (
-            "Title.TLabel",
-            COLORS["bg_primary"],
-            COLORS["font_primary"],
-            11,
-        ),
-        (
-            "Status.Value.TLabel",
-            COLORS["bg_secondary"],
-            COLORS["font_primary"],
-            22,
-        ),
-        (
-            "Status.Unit.TLabel",
-            COLORS["bg_primary"],
-            COLORS["font_primary"],
-            10,
-        ),
+        ("Title.TLabel", COLORS["bg_primary"], COLORS["font_primary"], 11),
+        ("Status.Value.TLabel", COLORS["bg_secondary"], COLORS["font_primary"], 22),
+        ("Status.Unit.TLabel", COLORS["bg_primary"], COLORS["font_primary"], 10),
     ]:
         style.configure(
             style_name,
@@ -38,20 +23,8 @@ def setup_ttk_styles(style: Style) -> None:
 
     # Configure button styles
     for style_name, width, fg, font_size, padding in [
-        (
-            "Rate.TButton",
-            5,
-            COLORS["rate_font"]["unselected"],
-            12,
-            (2, 12),
-        ),
-        (
-            "Buffer.TButton",
-            5,
-            COLORS["buffer_font"]["unselected"],
-            12,
-            (2, 12),
-        ),
+        ("Rate.TButton", 5, COLORS["rate_font"]["unselected"], 12, (2, 12)),
+        ("Buffer.TButton", 5, COLORS["buffer_font"]["unselected"], 12, (2, 12)),
     ]:
         style.configure(
             style_name,

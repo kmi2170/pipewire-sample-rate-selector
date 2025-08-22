@@ -115,18 +115,18 @@ class PipewireGUI:
         for i, weight in enumerate([1, 0, 0, 1]):
             frame.grid_columnconfigure(i, weight=weight)
 
-        current_rate_text = Formatters.format_sample_rate(
+        current_sample_rate_text = Formatters.format_sample_rate(
             self.controller.get_current_value("rate")
         )
-        current_buffer_text = Formatters.format_buffer_size(
+        current_buffer_size_text = Formatters.format_buffer_size(
             self.controller.get_current_value("quantum")
         )
         self.current_sample_rate_label = self._create_status_label(
-            frame, current_rate_text, 0, width=5
+            frame, current_sample_rate_text, 0, width=5
         )
         self._create_unit_label(frame, SAMPLE_RATE_CONFIG["unit"], 1)
         self.current_buffer_size_label = self._create_status_label(
-            frame, current_buffer_text, 2, width=4
+            frame, current_buffer_size_text, 2, width=4
         )
         self._create_unit_label(frame, BUFFER_SIZE_CONFIG["unit"], 3)
 
