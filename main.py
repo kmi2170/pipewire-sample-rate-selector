@@ -47,28 +47,25 @@ class PipewireController:
 
     def _get_force_value(self, type: PipewireValueType) -> Optional[int]:
         try:
-            setting = subprocess.check_output(
-                f"pw-metadata -n settings 0 clock.force-{type}", shell=True
-            )
-            value = setting.decode("UTF-8").split("value:'")[1].split("' type:")[0]
+            cmd = f"pw-metadata -n settings 0 clock.force-{type}"
+            output = subprocess.check_output(cmd, shell=True)
+            value = output.decode("UTF-8").split("value:'")[1].split("' type:")[0]
             return int(value)
         except (subprocess.CalledProcessError, IndexError, ValueError):
             return None
 
     def _get_value(self, type: PipewireValueType) -> Optional[int]:
         try:
-            setting = subprocess.check_output(
-                f"pw-metadata -n settings 0 clock.{type}", shell=True
-            )
-            value = setting.decode("UTF-8").split("value:'")[1].split("' type:")[0]
+            cmd = f"pw-metadata -n settings 0 clock.{type}"
+            output = subprocess.check_output(cmd, shell=True)
+            value = output.decode("UTF-8").split("value:'")[1].split("' type:")[0]
             return int(value)
         except (subprocess.CalledProcessError, IndexError, ValueError):
             return None
 
     def set_value(self, value: int, type: PipewireValueType) -> None:
-        subprocess.run(
-            f"pw-metadata -n settings 0 clock.force-{type} {value}", shell=True
-        )
+        cmd = f"pw-metadata -n settings 0 clock.force-{type} {value}"
+        subprocess.run(cmd, shell=True)
         print(f"Setting {type} to: {value}")
 
 
@@ -165,21 +162,22 @@ class PipewireGUI:
     def _create_current_status_section(self) -> None:
         frame = Frame(self.root, style="Main.TFrame")
         frame.pack(pady=(10, 10))
-
         # Configure grid columns
         for i, weight in enumerate([1, 0, 0, 1]):
             frame.grid_columnconfigure(i, weight=weight)
 
-        current_rate = self.controller.get_current_value("rate")
-        current_buffer = self.controller.get_current_value("quantum")
-
+        current_rate_text = Formatters.format_sample_rate(
+            self.controller.get_current_value("rate")
+        )
+        current_buffer_text = Formatters.format_buffer_size(
+            self.controller.get_current_value("quantum")
+        )
         self.current_sample_rate_label = self._create_status_label(
-            frame, Formatters.format_sample_rate(current_rate), 0, width=5
+            frame, current_rate_text, 0, width=5
         )
         self._create_unit_label(frame, self.ui_config.sample_rate_config["unit"], 1)
-
         self.current_buffer_size_label = self._create_status_label(
-            frame, Formatters.format_buffer_size(current_buffer), 2, width=4
+            frame, current_buffer_text, 2, width=4
         )
         self._create_unit_label(frame, self.ui_config.buffer_size_config["unit"], 3)
 
@@ -206,7 +204,6 @@ class PipewireGUI:
     def _set_initial_button_selection(self) -> None:
         current_sample_rate = self.controller.get_current_value("rate")
         current_buffer_size = self.controller.get_current_value("quantum")
-
         self._update_button_selection(current_sample_rate, self._sample_rate_buttons)
         self._update_button_selection(current_buffer_size, self._buffer_buttons)
 
@@ -214,13 +211,11 @@ class PipewireGUI:
         Label(
             self.root, text=config["title"], style="Title.TLabel", anchor="center"
         ).pack(pady=(10, 0))
-
         self._create_buttons(config, buttons)
 
     def _create_buttons(self, config: ConfigDict, buttons: ButtonDict) -> None:
         button_frame = Frame(self.root, style="Main.TFrame")
         button_frame.pack()
-
         # Create buttons in a horizontal layout
         for value in config["available_values"]:
             formatted_value = (
@@ -235,7 +230,6 @@ class PipewireGUI:
                 style=config["style"],
             )
             button.pack(side="left", padx=5, pady=10)
-
             buttons[value] = button
 
     def on_button_selected(
