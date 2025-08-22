@@ -144,12 +144,12 @@ class PipewireGUI:
     def _setup_config_for_ui(self) -> None:
         self._sample_rate_config = {
             **self.ui_config.sample_rate_config,
-            "format_function": self._format_sample_rate,
+            "format_function": Formatters.format_sample_rate,
             "available_values": self.controller.get_available_sample_rates(),
         }
         self._buffer_size_config = {
             **self.ui_config.buffer_size_config,
-            "format_function": None,
+            "format_function": Formatters.format_buffer_size,
             "available_values": self.controller.get_available_buffer_sizes(),
         }
 
@@ -174,12 +174,12 @@ class PipewireGUI:
         current_buffer = self.controller.get_current_value("quantum")
 
         self.current_sample_rate_label = self._create_status_label(
-            frame, self._format_sample_rate(current_rate), 0, width=5
+            frame, Formatters.format_sample_rate(current_rate), 0, width=5
         )
         self._create_unit_label(frame, "kHz", 1)
 
         self.current_buffer_size_label = self._create_status_label(
-            frame, self._format_buffer_size(current_buffer), 2, width=4
+            frame, Formatters.format_buffer_size(current_buffer), 2, width=4
         )
         self._create_unit_label(frame, "samples", 3)
 
@@ -262,14 +262,20 @@ class PipewireGUI:
         current_value = self.controller.get_current_value(type)
         if type == "rate":
             self.current_sample_rate_label.config(
-                text=self._format_sample_rate(current_value)
+                text=Formatters.format_sample_rate(current_value)
             )
         elif type == "quantum":
             self.current_buffer_size_label.config(
-                text=self._format_buffer_size(current_value)
+                text=Formatters.format_buffer_size(current_value)
             )
 
-    def _format_sample_rate(self, rate: int | None) -> str:
+    def run(self):
+        self.root.mainloop()
+
+
+class Formatters:
+    @staticmethod
+    def format_sample_rate(rate: int | None) -> str:
         if not isinstance(rate, int):
             return "--------"
         if rate < 1000:
@@ -277,11 +283,9 @@ class PipewireGUI:
         formatted = rate / 1000
         return str(int(formatted)) if formatted.is_integer() else f"{formatted:.1f}"
 
-    def _format_buffer_size(self, buffer_size: int | None) -> str:
+    @staticmethod
+    def format_buffer_size(buffer_size: int | None) -> str:
         return str(buffer_size) if isinstance(buffer_size, int) else "------"
-
-    def run(self):
-        self.root.mainloop()
 
 
 class PipewireSampleRateSelector:
