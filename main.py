@@ -3,6 +3,8 @@ from tkinter.ttk import *  # Override with ttk widgets
 from typing import Literal, Optional, Tuple, Dict, Any
 import subprocess
 
+from colors import APP_COLORS
+
 PipewireValueType = Literal["rate", "quantum"]
 ButtonDict = Dict[int, Button]
 ConfigDict = Dict[str, Any]
@@ -25,37 +27,6 @@ BUFFER_SIZE_CONFIG = {
     "type": "quantum",
     "title": "Buffer Size",
     "unit": "samples",
-}
-
-# Application color constants
-APP_COLORS = {
-    "bg_primary": "black",
-    "bg_secondary": "#202020",
-    "font_primary": "white",
-    "rate_font": {
-        "unselected": "cyan",
-        "active": "black",
-        "pressed": "black",
-        "selected": "black",
-    },
-    "buffer_font": {
-        "unselected": "magenta",
-        "active": "black",
-        "pressed": "black",
-        "selected": "black",
-    },
-    "rate_button": {
-        "unselected": "#202020",
-        "active": "lightblue",
-        "pressed": "cyan",
-        "selected": "cyan",
-    },
-    "buffer_button": {
-        "unselected": "#202020",
-        "active": "pink",
-        "pressed": "magenta",
-        "selected": "magenta",
-    },
 }
 
 
@@ -356,13 +327,16 @@ class PipewireSampleRateSelector:
     def __init__(self):
         root = Tk()
         controller = PipewireController()
-
         self.gui = PipewireGUI(root, controller)
 
     def run(self):
         self.gui.run()
 
 
-if __name__ == "__main__":
+def main():
     app = PipewireSampleRateSelector()
     app.run()
+
+
+if __name__ == "__main__":
+    main()
