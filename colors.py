@@ -26,4 +26,16 @@ COLORS = {
         "pressed": "magenta",
         "selected": "magenta",
     },
+    "control_button": {
+        "unselected": "#202020",
+        "active": "darkgray",
+        "pressed": "black",
+        "selected": "black",
+    },
+    "control_font": {
+        "unselected": "white",
+        "active": "white",
+        "pressed": "white",
+        "selected": "white",
+    },
 }

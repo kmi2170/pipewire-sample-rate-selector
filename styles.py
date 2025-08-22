@@ -25,6 +25,7 @@ def setup_ttk_styles(style: Style) -> None:
     for style_name, width, fg, font_size, padding in [
         ("Rate.TButton", 5, COLORS["rate_font"]["unselected"], 12, (2, 12)),
         ("Buffer.TButton", 5, COLORS["buffer_font"]["unselected"], 12, (2, 12)),
+        ("Control.TButton", 8, COLORS["control_font"]["unselected"], 10, (4, 8)),
     ]:
         style.configure(
             style_name,
@@ -63,6 +64,15 @@ def setup_ttk_styles(style: Style) -> None:
             COLORS["buffer_font"]["active"],
             COLORS["buffer_font"]["pressed"],
             COLORS["buffer_font"]["selected"],
+        ),
+        (
+            "Control.TButton",
+            COLORS["control_button"]["active"],
+            COLORS["control_button"]["pressed"],
+            COLORS["control_button"]["selected"],
+            COLORS["control_font"]["active"],
+            COLORS["control_font"]["pressed"],
+            COLORS["control_font"]["selected"],
         ),
     ]:
         style.map(

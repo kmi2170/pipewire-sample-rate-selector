@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter.ttk import *  # Override with ttk widgets
-from typing import Literal, Optional, Tuple, Dict, Any
+from typing import Literal, Optional, Dict, Any
 import subprocess
 
 from colors import COLORS
@@ -18,7 +18,7 @@ AVAILABLE_BUFFER_SIZES = (32, 64, 128, 256, 512, 1024, 2048)
 
 
 # UI configuration constants
-WINDOW_GEOMETRY = "480x280"
+WINDOW_GEOMETRY = "480x330"
 WINDOW_TITLE = "Pipewire Sample Rate Selector"
 SAMPLE_RATE_CONFIG = {
     "type": "rate",
@@ -74,6 +74,8 @@ class PipewireGUI:
         self._setup_ttk_style()
         self._setup_config_for_ui()
         self._create_ui_elements()
+        self._create_control_buttons()
+        self._update_status_and_button_selection()
 
     def _setup_window(self) -> None:
         self.root.geometry(WINDOW_GEOMETRY)
@@ -110,8 +112,6 @@ class PipewireGUI:
             self._buffer_buttons,
         )
 
-        self._set_initial_button_selection()
-
     def _create_current_status_section(self) -> None:
         frame = Frame(self.root, style="Main.TFrame")
         frame.pack(pady=(10, 10))
@@ -119,18 +119,18 @@ class PipewireGUI:
         for i, weight in enumerate([1, 0, 0, 1]):
             frame.grid_columnconfigure(i, weight=weight)
 
-        current_sample_rate_text = Formatters.format_sample_rate(
-            self.controller.get_current_value("rate")
-        )
-        current_buffer_size_text = Formatters.format_buffer_size(
-            self.controller.get_current_value("quantum")
-        )
+        # current_sample_rate_text = Formatters.format_sample_rate(
+        #     self.controller.get_current_value("rate")
+        # )
+        # current_buffer_size_text = Formatters.format_buffer_size(
+        #     self.controller.get_current_value("quantum")
+        # )
         self.current_sample_rate_label = self._create_status_label(
-            frame, current_sample_rate_text, 0, width=5
+            frame, Formatters.format_sample_rate(None), 0, width=5
         )
         self._create_unit_label(frame, SAMPLE_RATE_CONFIG["unit"], 1)
         self.current_buffer_size_label = self._create_status_label(
-            frame, current_buffer_size_text, 2, width=4
+            frame, Formatters.format_buffer_size(None), 2, width=4
         )
         self._create_unit_label(frame, BUFFER_SIZE_CONFIG["unit"], 3)
 
@@ -152,18 +152,6 @@ class PipewireGUI:
         padding = (0, 0, 10, 0) if column == 1 else (0, 0, 0, 0)
         Label(parent, text=text, style="Status.Unit.TLabel", padding=padding).grid(
             row=0, column=column, padx=5, pady=0, sticky="sw"
-        )
-
-    def _set_initial_button_selection(self) -> None:
-        current_sample_rate = self.controller.get_current_value("rate")
-        current_buffer_size = self.controller.get_current_value("quantum")
-        self._update_button_selection(
-            current_sample_rate,
-            self._sample_rate_buttons,
-        )
-        self._update_button_selection(
-            current_buffer_size,
-            self._buffer_buttons,
         )
 
     def _create_buttons_section(self, config: ConfigDict, buttons: ButtonDict) -> None:
@@ -188,6 +176,36 @@ class PipewireGUI:
             button.pack(side="left", padx=5, pady=10)
             buttons[value] = button
 
+    def _create_control_buttons(self) -> None:
+        button_frame = Frame(self.root, style="Main.TFrame")
+        button_frame.pack(padx=10, fill="x")
+        Button(
+            button_frame,
+            text="Sync",
+            style="Control.TButton",
+            command=self._update_status_and_button_selection,
+        ).pack(side="left", pady=(10, 0))
+        Button(
+            button_frame,
+            text="Exit",
+            style="Control.TButton",
+            command=self.root.quit,
+        ).pack(side="right", pady=(10, 0))
+
+    def _update_status_and_button_selection(self) -> None:
+        current_sample_rate = self.controller.get_current_value("rate")
+        current_buffer_size = self.controller.get_current_value("quantum")
+        self._update_status("rate", current_sample_rate)
+        self._update_status("quantum", current_buffer_size)
+        self._update_button_selection(
+            current_sample_rate,
+            self._sample_rate_buttons,
+        )
+        self._update_button_selection(
+            current_buffer_size,
+            self._buffer_buttons,
+        )
+
     def on_button_selected(
         self,
         value: int,
@@ -195,8 +213,19 @@ class PipewireGUI:
         type: PipewireValueType,
     ) -> None:
         self.controller.set_value(value, type)
-        self.update_status(type)
+        current_value = self.controller.get_current_value(type)
+        self._update_status(type, current_value)
         self._update_button_selection(value, buttons)
+
+    def _update_status(self, type: PipewireValueType, value: int) -> None:
+        if type == "rate":
+            self.current_sample_rate_label.config(
+                text=Formatters.format_sample_rate(value)
+            )
+        elif type == "quantum":
+            self.current_buffer_size_label.config(
+                text=Formatters.format_buffer_size(value)
+            )
 
     def _update_button_selection(
         self, selected_value: int, buttons: ButtonDict
@@ -207,17 +236,6 @@ class PipewireGUI:
             else:
                 if "pressed" in button.state():
                     button.state(["!pressed"])
-
-    def update_status(self, type: PipewireValueType) -> None:
-        current_value = self.controller.get_current_value(type)
-        if type == "rate":
-            self.current_sample_rate_label.config(
-                text=Formatters.format_sample_rate(current_value)
-            )
-        elif type == "quantum":
-            self.current_buffer_size_label.config(
-                text=Formatters.format_buffer_size(current_value)
-            )
 
     def run(self):
         self.root.mainloop()
