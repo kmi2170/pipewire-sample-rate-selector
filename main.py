@@ -79,7 +79,7 @@ class PipewireGUI:
         self.root.geometry(WINDOW_GEOMETRY)
         self.root.resizable(False, False)
         self.root.title(WINDOW_TITLE)
-        self.root.configure(bg="black", padx=10, pady=10)
+        self.root.configure(bg=COLORS["bg_primary"], padx=10, pady=10)
 
     def _setup_ttk_style(self) -> None:
         self.style = Style()
@@ -102,9 +102,13 @@ class PipewireGUI:
     def _create_ui_elements(self) -> None:
         self._create_current_status_section()
         self._create_buttons_section(
-            self._sample_rate_config, self._sample_rate_buttons
+            self._sample_rate_config,
+            self._sample_rate_buttons,
         )
-        self._create_buttons_section(self._buffer_size_config, self._buffer_buttons)
+        self._create_buttons_section(
+            self._buffer_size_config,
+            self._buffer_buttons,
+        )
 
         self._set_initial_button_selection()
 
@@ -153,8 +157,14 @@ class PipewireGUI:
     def _set_initial_button_selection(self) -> None:
         current_sample_rate = self.controller.get_current_value("rate")
         current_buffer_size = self.controller.get_current_value("quantum")
-        self._update_button_selection(current_sample_rate, self._sample_rate_buttons)
-        self._update_button_selection(current_buffer_size, self._buffer_buttons)
+        self._update_button_selection(
+            current_sample_rate,
+            self._sample_rate_buttons,
+        )
+        self._update_button_selection(
+            current_buffer_size,
+            self._buffer_buttons,
+        )
 
     def _create_buttons_section(self, config: ConfigDict, buttons: ButtonDict) -> None:
         Label(
@@ -167,12 +177,9 @@ class PipewireGUI:
         button_frame.pack()
         # Create buttons in a horizontal layout
         for value in config["available_values"]:
-            formatted_value = (
-                config["format_function"](value) if config["format_function"] else value
-            )
             button = Button(
                 button_frame,
-                text=formatted_value,
+                text=config["format_function"](value),
                 command=lambda v=value: self.on_button_selected(
                     v, buttons, config["type"]
                 ),
