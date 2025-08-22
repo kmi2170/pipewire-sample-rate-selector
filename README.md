@@ -8,6 +8,7 @@ A simple python app for Pipewire audio settings. With a simple GUI, allowing you
 - Select buffer sizes (32 – 2048 samples)
 - Apply changes instantly
 - Simple, intuitive GUI
+- Use ttk (Themed TK) for a more modern look and feel
 
 ## Requirements
 
