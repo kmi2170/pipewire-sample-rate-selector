@@ -176,12 +176,12 @@ class PipewireGUI:
         self.current_sample_rate_label = self._create_status_label(
             frame, Formatters.format_sample_rate(current_rate), 0, width=5
         )
-        self._create_unit_label(frame, "kHz", 1)
+        self._create_unit_label(frame, self.ui_config.sample_rate_config["unit"], 1)
 
         self.current_buffer_size_label = self._create_status_label(
             frame, Formatters.format_buffer_size(current_buffer), 2, width=4
         )
-        self._create_unit_label(frame, "samples", 3)
+        self._create_unit_label(frame, self.ui_config.buffer_size_config["unit"], 3)
 
     def _create_status_label(
         self, parent: Frame, text: str, column: int, width: int
