@@ -1,4 +1,4 @@
-APP_COLORS = {
+COLORS = {
     "bg_primary": "black",
     "bg_secondary": "#202020",
     "font_primary": "white",

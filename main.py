@@ -3,7 +3,7 @@ from tkinter.ttk import *  # Override with ttk widgets
 from typing import Literal, Optional, Tuple, Dict, Any
 import subprocess
 
-from colors import APP_COLORS
+from colors import COLORS
 
 PipewireValueType = Literal["rate", "quantum"]
 ButtonDict = Dict[int, Button]
@@ -81,24 +81,24 @@ class PipewireGUI:
 
     def _setup_ttk_style(self) -> None:
         self.style = Style()
-        self.style.configure("Main.TFrame", background=APP_COLORS["bg_primary"])
+        self.style.configure("Main.TFrame", background=COLORS["bg_primary"])
         for style_name, bg, fg, font_size in [
             (
                 "Title.TLabel",
-                APP_COLORS["bg_primary"],
-                APP_COLORS["font_primary"],
+                COLORS["bg_primary"],
+                COLORS["font_primary"],
                 11,
             ),
             (
                 "Status.Value.TLabel",
-                APP_COLORS["bg_secondary"],
-                APP_COLORS["font_primary"],
+                COLORS["bg_secondary"],
+                COLORS["font_primary"],
                 22,
             ),
             (
                 "Status.Unit.TLabel",
-                APP_COLORS["bg_primary"],
-                APP_COLORS["font_primary"],
+                COLORS["bg_primary"],
+                COLORS["font_primary"],
                 10,
             ),
         ]:
@@ -112,14 +112,14 @@ class PipewireGUI:
             (
                 "Rate.TButton",
                 5,
-                APP_COLORS["rate_font"]["unselected"],
+                COLORS["rate_font"]["unselected"],
                 12,
                 (2, 12),
             ),
             (
                 "Buffer.TButton",
                 5,
-                APP_COLORS["buffer_font"]["unselected"],
+                COLORS["buffer_font"]["unselected"],
                 12,
                 (2, 12),
             ),
@@ -127,7 +127,7 @@ class PipewireGUI:
             self.style.configure(
                 style_name,
                 width=width,
-                background=APP_COLORS["bg_secondary"],
+                background=COLORS["bg_secondary"],
                 foreground=fg,
                 relief="flat",
                 font=("Arial", font_size, "bold"),
@@ -146,21 +146,21 @@ class PipewireGUI:
         ) in [
             (
                 "Rate.TButton",
-                APP_COLORS["rate_button"]["active"],
-                APP_COLORS["rate_button"]["pressed"],
-                APP_COLORS["rate_button"]["selected"],
-                APP_COLORS["rate_font"]["active"],
-                APP_COLORS["rate_font"]["pressed"],
-                APP_COLORS["rate_font"]["selected"],
+                COLORS["rate_button"]["active"],
+                COLORS["rate_button"]["pressed"],
+                COLORS["rate_button"]["selected"],
+                COLORS["rate_font"]["active"],
+                COLORS["rate_font"]["pressed"],
+                COLORS["rate_font"]["selected"],
             ),
             (
                 "Buffer.TButton",
-                APP_COLORS["buffer_button"]["active"],
-                APP_COLORS["buffer_button"]["pressed"],
-                APP_COLORS["buffer_button"]["selected"],
-                APP_COLORS["buffer_font"]["active"],
-                APP_COLORS["buffer_font"]["pressed"],
-                APP_COLORS["buffer_font"]["selected"],
+                COLORS["buffer_button"]["active"],
+                COLORS["buffer_button"]["pressed"],
+                COLORS["buffer_button"]["selected"],
+                COLORS["buffer_font"]["active"],
+                COLORS["buffer_font"]["pressed"],
+                COLORS["buffer_font"]["selected"],
             ),
         ]:
             self.style.map(
