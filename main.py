@@ -162,7 +162,7 @@ class PipewireGUI:
             button = Button(
                 button_frame,
                 text=config["format_function"](value),
-                command=lambda v=value: self.on_button_selected(v, config["type"]),
+                command=lambda v=value: self._on_button_selected(v, config["type"]),
                 style=config["style"],
             )
             button.pack(side="left", padx=5, pady=10)
@@ -188,7 +188,7 @@ class PipewireGUI:
         self._update_sample_rate_status_and_button_selection()
         self._update_buffer_size_status_and_button_selection()
 
-    def on_button_selected(
+    def _on_button_selected(
         self,
         value: int,
         type: PipewireValueType,
