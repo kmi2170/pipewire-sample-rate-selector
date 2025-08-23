@@ -74,7 +74,6 @@ class PipewireGUI:
         self._setup_ttk_style()
         self._setup_config_for_ui()
         self._create_ui_elements()
-        self._create_control_buttons()
         self._sync_status_and_button_selection()
 
     def _setup_window(self) -> None:
@@ -111,6 +110,7 @@ class PipewireGUI:
             self._buffer_size_config,
             self._buffer_buttons,
         )
+        self._create_control_buttons()
 
     def _create_current_status_section(self) -> None:
         frame = Frame(self.root, style="Main.TFrame")
