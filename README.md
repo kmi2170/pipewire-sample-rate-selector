@@ -7,8 +7,17 @@ A simple python app for Pipewire audio settings. With a simple GUI, allowing you
 - Select allowed sample rates (44.1 kHz - 192kHz)
 - Select buffer sizes (32 – 2048 samples)
 - Apply changes instantly
-- Simple, intuitive GUI
-- Use ttk (Themed TK) for a more modern look and feel
+- Simple, intuitive GUI with the use of ttk (Themed TK) for a more modern look and feel
+- GUI consists of 4 parts
+
+  - Display the current sample rate and buffer size
+  - The button group for selecting sample rate
+  - The button group for selecting buffer size
+  - The control buttons:
+
+    Exit: Terminate the app
+
+    Sync: Synchronize the displayed sample rate and buffer size with the actual ones (You normally don't need to use this. Just in case for the sample rate and buffer size has changed by other ways)
 
 ## Requirements
 
