@@ -162,9 +162,7 @@ class PipewireGUI:
             button = Button(
                 button_frame,
                 text=config["format_function"](value),
-                command=lambda v=value: self.on_button_selected(
-                    v, buttons, config["type"]
-                ),
+                command=lambda v=value: self.on_button_selected(v, config["type"]),
                 style=config["style"],
             )
             button.pack(side="left", padx=5, pady=10)
@@ -187,39 +185,37 @@ class PipewireGUI:
         ).pack(side="right", pady=(10, 0))
 
     def _sync_status_and_button_selection(self) -> None:
-        current_sample_rate = self.controller.get_current_value("rate")
-        current_buffer_size = self.controller.get_current_value("quantum")
-        self._update_status("rate", current_sample_rate)
-        self._update_status("quantum", current_buffer_size)
-        self._update_button_selection(
-            current_sample_rate,
-            self._sample_rate_buttons,
-        )
-        self._update_button_selection(
-            current_buffer_size,
-            self._buffer_buttons,
-        )
+        self._update_sample_rate_status_and_button_selection()
+        self._update_buffer_size_status_and_button_selection()
 
     def on_button_selected(
         self,
         value: int,
-        buttons: ButtonDict,
         type: PipewireValueType,
     ) -> None:
         self.controller.set_value(value, type)
-        current_value = self.controller.get_current_value(type)
-        self._update_status(type, current_value)
-        self._update_button_selection(value, buttons)
-
-    def _update_status(self, type: PipewireValueType, value: int) -> None:
         if type == "rate":
-            self.current_sample_rate_label.config(
-                text=Formatters.format_sample_rate(value)
-            )
+            self._update_sample_rate_status_and_button_selection()
         elif type == "quantum":
-            self.current_buffer_size_label.config(
-                text=Formatters.format_buffer_size(value)
-            )
+            self._update_buffer_size_status_and_button_selection()
+
+    def _update_sample_rate_status_and_button_selection(
+        self,
+    ) -> None:
+        current_value = self.controller.get_current_value("rate")
+        self.current_sample_rate_label.config(
+            text=Formatters.format_sample_rate(current_value)
+        )
+        self._update_button_selection(current_value, self._sample_rate_buttons)
+
+    def _update_buffer_size_status_and_button_selection(
+        self,
+    ) -> None:
+        current_value = self.controller.get_current_value("quantum")
+        self.current_buffer_size_label.config(
+            text=Formatters.format_buffer_size(current_value)
+        )
+        self._update_button_selection(current_value, self._buffer_buttons)
 
     def _update_button_selection(
         self, selected_value: int, buttons: ButtonDict
