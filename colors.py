@@ -1,15 +1,9 @@
 COLORS = {
-    "bg_primary": "#384959",
+    "bg_primary": "#2a3a4a",
     "bg_secondary": "#202020",
-    "font_primary": "lightgray",
+    "font_primary": "#FDFBD4",
     "rate_font": {
-        "unselected": "#BDDDFC",
-        "active": "black",
-        "pressed": "black",
-        "selected": "black",
-    },
-    "buffer_font": {
-        "unselected": "#88BDF2",
+        "unselected": "#66F4FF",
         "active": "black",
         "pressed": "black",
         "selected": "black",
@@ -17,25 +11,31 @@ COLORS = {
     "rate_button": {
         "unselected": "#202020",
         "active": "lightblue",
-        "pressed": "#BDDDFC",
-        "selected": "#BDDDFC",
+        "pressed": "#66F4FF",
+        "selected": "#66F4FF",
     },
     "buffer_button": {
         "unselected": "#202020",
-        "active": "lightblue",
-        "pressed": "#88BDF2",
-        "selected": "#88BDF2",
+        "active": "pink",
+        "pressed": "#F23598",
+        "selected": "#F23598",
     },
-    "control_button": {
-        "unselected": "#202020",
-        "active": "lightblue",
+    "buffer_font": {
+        "unselected": "#F23598",
+        "active": "black",
         "pressed": "black",
         "selected": "black",
     },
     "control_font": {
-        "unselected": "lightgray",
-        "active": "lightgray",
-        "pressed": "lightgray",
-        "selected": "lightgray",
+        "unselected": "#D9D7B6",
+        "active": "black",
+        "pressed": "black",
+        "selected": "black",
+    },
+    "control_button": {
+        "unselected": "black",
+        "active": "#FDFBD4",
+        "pressed": "black",
+        "selected": "black",
     },
 }
