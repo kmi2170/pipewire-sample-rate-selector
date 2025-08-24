@@ -17,11 +17,11 @@ COLORS = {
     "buffer_button": {
         "unselected": "#202020",
         "active": "pink",
-        "pressed": "#F23598",
-        "selected": "#F23598",
+        "pressed": "#FD3DB5",
+        "selected": "#FD3DB5",
     },
     "buffer_font": {
-        "unselected": "#F23598",
+        "unselected": "#FD3DB5",
         "active": "black",
         "pressed": "black",
         "selected": "black",
