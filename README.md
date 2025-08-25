@@ -1,6 +1,6 @@
 # Pipewire Sample Rate Selector
 
-A simple python GUI widget for adjusting Pipewire audio sample rate and buffer (quantum) size settings.
+A simple python GUI widget for adjusting Pipewire audio sample rate and buffer (quantum) size settings for optimal sound quality.
 
 ## Features
 
