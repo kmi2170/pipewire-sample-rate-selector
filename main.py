@@ -143,11 +143,11 @@ class PipewireGUI:
         )
         self._create_unit_label(frame, QUANTUM_CONFIG["unit"], 1, 3)
 
-        self._create_status_title_label(frame, LATENCY_CONFIG["title"], 0, 5)
+        self._create_status_title_label(frame, LATENCY_CONFIG["title"], 0, 4)
         self._current_latency_label = self._create_status_value_label(
-            frame, Formatters.format_latency(None), 1, 5, width=4
+            frame, Formatters.format_latency(None), 1, 4, width=4
         )
-        self._create_unit_label(frame, LATENCY_CONFIG["unit"], 1, 6)
+        self._create_unit_label(frame, LATENCY_CONFIG["unit"], 1, 5)
 
     def _create_status_title_label(
         self, parent: Frame, text: str, row: int, column: int
