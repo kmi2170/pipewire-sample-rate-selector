@@ -6,6 +6,7 @@ import subprocess
 from colors import COLORS
 from styles import setup_ttk_styles
 from formatters import Formatters
+from utility import Utility
 
 PipewireValueType = Literal["rate", "quantum"]
 ButtonDict = Dict[int, Button]
@@ -125,38 +126,28 @@ class PipewireGUI:
     def _create_current_status_section(self) -> None:
         frame = Frame(self.root, style="Main.TFrame")
         frame.pack(pady=(10, 10))
-        # Configure grid columns
         for i, weight in enumerate([1, 0, 0, 1]):
             frame.grid_columnconfigure(i, weight=weight)
 
-        self.current_sample_rate_label = self._create_status_label(
+        self.current_sample_rate_label = self._create_status_value_label(
             frame, Formatters.format_sample_rate(None), 0, width=5
         )
         self._create_unit_label(frame, SAMPLE_RATE_CONFIG["unit"], 1)
-        self.current_buffer_size_label = self._create_status_label(
+        self.current_buffer_size_label = self._create_status_value_label(
             frame, Formatters.format_buffer_size(None), 2, width=4
         )
         self._create_unit_label(frame, QUANTUM_CONFIG["unit"], 3)
-        self.current_latency_label = self._create_status_label(
+        self.current_latency_label = self._create_status_value_label(
             frame, Formatters.format_latency(None), 5, width=4
         )
         self._create_unit_label(frame, LATENCY_CONFIG["unit"], 6)
 
-    def _create_statuses(self) -> None:
-        self._create_sample_rate_status()
-        self._create_buffer_size_status()
-        self._create_latency_status()
+    def _create_status_title_label(self, parent: Frame, text: str, column: int) -> None:
+        Label(parent, text=text, style="Status.Title.TLabel").grid(
+            row=0, column=column, padx=0, pady=0, sticky="sw"
+        )
 
-    def _create_sample_rate_status(self) -> None:
-        pass
-
-    def _create_buffer_size_status(self) -> None:
-        pass
-
-    def _create_latency_status(self) -> None:
-        pass
-
-    def _create_status_label(
+    def _create_status_value_label(
         self, parent: Frame, text: str, column: int, width: int
     ) -> Label:
         label = Label(
@@ -215,6 +206,7 @@ class PipewireGUI:
     def _sync_status_and_button_selection(self) -> None:
         self._update_sample_rate_status_and_button_selection()
         self._update_buffer_size_status_and_button_selection()
+        self._update_latency_status()
 
     def _on_button_selected(
         self,
@@ -226,6 +218,7 @@ class PipewireGUI:
             self._update_sample_rate_status_and_button_selection()
         elif type == "quantum":
             self._update_buffer_size_status_and_button_selection()
+        self._update_latency_status()
 
     def _update_sample_rate_status_and_button_selection(
         self,
@@ -244,6 +237,13 @@ class PipewireGUI:
             text=Formatters.format_buffer_size(current_value)
         )
         self._update_button_selection(current_value, self._buffer_buttons)
+
+    def _update_latency_status(self) -> None:
+        current_value = Utility.latency_in_ms(
+            self.controller.get_current_value("rate"),
+            self.controller.get_current_value("quantum"),
+        )
+        self.current_latency_label.config(text=Formatters.format_latency(current_value))
 
     def _update_button_selection(
         self, selected_value: int, buttons: ButtonDict
