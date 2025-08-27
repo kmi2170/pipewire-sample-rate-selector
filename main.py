@@ -129,15 +129,15 @@ class PipewireGUI:
         for i, weight in enumerate([1, 0, 0, 1]):
             frame.grid_columnconfigure(i, weight=weight)
 
-        self.current_sample_rate_label = self._create_status_value_label(
+        self._current_sample_rate_label = self._create_status_value_label(
             frame, Formatters.format_sample_rate(None), 0, width=5
         )
         self._create_unit_label(frame, SAMPLE_RATE_CONFIG["unit"], 1)
-        self.current_buffer_size_label = self._create_status_value_label(
+        self._current_buffer_size_label = self._create_status_value_label(
             frame, Formatters.format_buffer_size(None), 2, width=4
         )
         self._create_unit_label(frame, QUANTUM_CONFIG["unit"], 3)
-        self.current_latency_label = self._create_status_value_label(
+        self._current_latency_label = self._create_status_value_label(
             frame, Formatters.format_latency(None), 5, width=4
         )
         self._create_unit_label(frame, LATENCY_CONFIG["unit"], 6)
@@ -224,7 +224,7 @@ class PipewireGUI:
         self,
     ) -> None:
         current_value = self.controller.get_current_value("rate")
-        self.current_sample_rate_label.config(
+        self._current_sample_rate_label.config(
             text=Formatters.format_sample_rate(current_value)
         )
         self._update_button_selection(current_value, self._sample_rate_buttons)
@@ -233,7 +233,7 @@ class PipewireGUI:
         self,
     ) -> None:
         current_value = self.controller.get_current_value("quantum")
-        self.current_buffer_size_label.config(
+        self._current_buffer_size_label.config(
             text=Formatters.format_buffer_size(current_value)
         )
         self._update_button_selection(current_value, self._buffer_buttons)
@@ -243,7 +243,9 @@ class PipewireGUI:
             self.controller.get_current_value("rate"),
             self.controller.get_current_value("quantum"),
         )
-        self.current_latency_label.config(text=Formatters.format_latency(current_value))
+        self._current_latency_label.config(
+            text=Formatters.format_latency(current_value)
+        )
 
     def _update_button_selection(
         self, selected_value: int, buttons: ButtonDict
