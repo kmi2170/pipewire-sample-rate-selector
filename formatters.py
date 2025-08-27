@@ -11,3 +11,7 @@ class Formatters:
     @staticmethod
     def format_buffer_size(buffer_size: int | None) -> str:
         return str(buffer_size) if isinstance(buffer_size, int) else "------"
+
+    @staticmethod
+    def format_latency(latency: int | None) -> str:
+        return str(latency) if isinstance(latency, int) else "------"

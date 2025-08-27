@@ -30,6 +30,11 @@ QUANTUM_CONFIG = {
     "title": "Quantum",
     "unit": "frames",
 }
+LATENCY_CONFIG = {
+    "type": "latency",
+    "title": "Latency",
+    "unit": "ms",
+}
 
 
 class PipewireController:
@@ -99,6 +104,11 @@ class PipewireGUI:
             "format_function": Formatters.format_buffer_size,
             "available_values": AVAILABLE_BUFFER_SIZES,
         }
+        self._latency_config = {
+            **LATENCY_CONFIG,
+            "style": "Latency.TButton",
+            "format_function": Formatters.format_latency,
+        }
 
     def _create_ui_elements(self) -> None:
         self._create_current_status_section()
@@ -127,6 +137,24 @@ class PipewireGUI:
             frame, Formatters.format_buffer_size(None), 2, width=4
         )
         self._create_unit_label(frame, QUANTUM_CONFIG["unit"], 3)
+        self.current_latency_label = self._create_status_label(
+            frame, Formatters.format_latency(None), 5, width=4
+        )
+        self._create_unit_label(frame, LATENCY_CONFIG["unit"], 6)
+
+    def _create_statuses(self) -> None:
+        self._create_sample_rate_status()
+        self._create_buffer_size_status()
+        self._create_latency_status()
+
+    def _create_sample_rate_status(self) -> None:
+        pass
+
+    def _create_buffer_size_status(self) -> None:
+        pass
+
+    def _create_latency_status(self) -> None:
+        pass
 
     def _create_status_label(
         self, parent: Frame, text: str, column: int, width: int

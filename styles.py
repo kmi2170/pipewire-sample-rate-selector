@@ -13,6 +13,7 @@ def setup_ttk_styles(style: Style) -> None:
         ("Title.TLabel", COLORS["bg_primary"], COLORS["font_primary"], 11),
         ("Status.Value.TLabel", COLORS["bg_secondary"], COLORS["font_primary"], 22),
         ("Status.Unit.TLabel", COLORS["bg_primary"], COLORS["font_primary"], 10),
+        ("Status.Title.TLabel", COLORS["bg_primary"], COLORS["font_primary"], 8),
     ]:
         style.configure(
             style_name,
