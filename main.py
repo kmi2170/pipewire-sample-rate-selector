@@ -25,10 +25,10 @@ SAMPLE_RATE_CONFIG = {
     "title": "Sample Rate",
     "unit": "kHz",
 }
-BUFFER_SIZE_CONFIG = {
+QUANTUM_CONFIG = {
     "type": "quantum",
-    "title": "Buffer Size",
-    "unit": "samples",
+    "title": "Quantum",
+    "unit": "frames",
 }
 
 
@@ -94,7 +94,7 @@ class PipewireGUI:
             "available_values": AVAILABLE_SAMPLE_RATES,
         }
         self._buffer_size_config = {
-            **BUFFER_SIZE_CONFIG,
+            **QUANTUM_CONFIG,
             "style": "Buffer.TButton",
             "format_function": Formatters.format_buffer_size,
             "available_values": AVAILABLE_BUFFER_SIZES,
@@ -126,7 +126,7 @@ class PipewireGUI:
         self.current_buffer_size_label = self._create_status_label(
             frame, Formatters.format_buffer_size(None), 2, width=4
         )
-        self._create_unit_label(frame, BUFFER_SIZE_CONFIG["unit"], 3)
+        self._create_unit_label(frame, QUANTUM_CONFIG["unit"], 3)
 
     def _create_status_label(
         self, parent: Frame, text: str, column: int, width: int
