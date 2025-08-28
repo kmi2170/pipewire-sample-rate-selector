@@ -10,7 +10,7 @@ A simple python GUI widget for managing Pipewire audio sample rate and quantum s
 - Simple, intuitive GUI with the use of ttk (Themed TK) for a more modern look and feel
 - GUI consists of 4 parts
 
-  - Display the current sample rate and quantum size
+  - Display the current sample rate, quantum size, and latency
   - The button group for selecting sample rate
   - The button group for selecting quantum size
   - The control buttons:
